@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/board_tile.dart';
 import '../../domain/usecases/generate_board.dart';
 import 'board_event.dart';
@@ -12,14 +11,14 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
   BoardBloc({required this.generateBoard}) : super(BoardWelcomeState()) {
     on<InitBoardEvent>((event, emit) async {
       emit(BoardLoading());
-      final result = await generateBoard(NoParams());
+      final result = await generateBoard(
+        GenerateBoardParams(playerName: event.playerName),
+      );
       result.fold(
         (failure) => emit(const BoardError('Error al crear el tablero')),
         (boardState) => emit(
           BoardReady(
-            boardState: boardState.copyWith(
-              playerName: event.playerName.isEmpty ? 'Investigador' : event.playerName,
-            ),
+            boardState: boardState,
           ),
         ),
       );
