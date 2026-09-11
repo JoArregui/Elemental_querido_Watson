@@ -116,58 +116,60 @@ class _BoardPageState extends State<BoardPage> {
           } else if (state is BoardFinished) {
             final board = state.boardState;
             return Center(
-              child: Container(
-                margin: const EdgeInsets.all(24),
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3CD),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.amber, width: 3),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.emoji_events, size: 64, color: Colors.amber),
-                    const SizedBox(height: 16),
-                    Text(
-                      '¡Enhorabuena, ${board.playerName}!',
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Has completado el tablero con un total de:',
-                      style: const TextStyle(fontSize: 15, color: Colors.brown),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber.shade800, width: 2),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3CD),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.amber, width: 3),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.emoji_events, size: 64, color: Colors.amber),
+                      const SizedBox(height: 16),
+                      Text(
+                        '¡Enhorabuena, ${board.playerName}!',
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                        textAlign: TextAlign.center,
                       ),
-                      child: Text(
-                        '${board.totalPicarats} Picarats',
-                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Has completado el tablero con un total de:',
+                        style: TextStyle(fontSize: 15, color: Colors.brown),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade200,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.amber.shade800, width: 2),
+                        ),
+                        child: Text(
+                          '${board.totalPicarats} Picarats',
+                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                        ),
                       ),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Nueva Partida', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      onPressed: () {
-                        _nameController.clear();
-                        context.read<BoardBloc>().add(InitBoardEvent(''));
-                      },
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Nueva Partida', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          _nameController.clear();
+                          context.read<BoardBloc>().add(const InitBoardEvent(''));
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -184,18 +186,21 @@ class _BoardPageState extends State<BoardPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            board.playerName,
-                            style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            'Picarats: ${board.totalPicarats}',
-                            style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              board.playerName,
+                              style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              'Picarats: ${board.totalPicarats}',
+                              style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
                       Text(
                         'Posición: ${board.currentPosition + 1} / ${board.tiles.length}',
@@ -266,26 +271,34 @@ class _BoardPageState extends State<BoardPage> {
 
                 // Área inferior de lanzamiento de dado
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   color: const Color(0xFF1A1009),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (board.lastDiceRoll != null)
-                        Text(
-                          'Último dado: 🎲 ${board.lastDiceRoll}',
-                          style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Último dado: 🎲 ${board.lastDiceRoll}',
+                              style: const TextStyle(color: Colors.amber, fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        )
+                      else
+                        const Spacer(),
+                      const SizedBox(width: 8),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isAtEnd ? Colors.grey : Colors.amber,
                           foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                         icon: const Icon(Icons.casino),
                         label: Text(
                           isAtEnd ? 'Fin del Recorrido' : 'Lanzar Dado',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         onPressed: isAtEnd
                             ? null
