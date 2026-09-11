@@ -9,24 +9,37 @@ import 'board_state.dart';
 class BoardBloc extends Bloc<BoardEvent, BoardState> {
   final GenerateBoard generateBoard;
 
-  BoardBloc({required this.generateBoard}) : super(BoardInitial()) {
+  BoardBloc({required this.generateBoard}) : super(BoardWelcomeState()) {
     on<InitBoardEvent>((event, emit) async {
       emit(BoardLoading());
       final result = await generateBoard(NoParams());
       result.fold(
         (failure) => emit(const BoardError('Error al crear el tablero')),
-        (boardState) => emit(BoardReady(boardState: boardState)),
+        (boardState) => emit(
+          BoardReady(
+            boardState: boardState.copyWith(
+              playerName: event.playerName.isEmpty ? 'Investigador' : event.playerName,
+            ),
+          ),
+        ),
       );
     });
 
     on<RollDiceEvent>((event, emit) {
       if (state is BoardReady) {
         final current = (state as BoardReady).boardState;
-        final diceValue = Random().nextInt(6) + 1;
+        final maxIndex = current.tiles.length - 1;
 
+        if (current.currentPosition >= maxIndex) {
+          emit(BoardFinished(current));
+          return;
+        }
+
+        final diceValue = Random().nextInt(6) + 1;
         int newPos = current.currentPosition + diceValue;
-        if (newPos >= current.tiles.length) {
-          newPos = current.tiles.length - 1;
+
+        if (newPos >= maxIndex) {
+          newPos = maxIndex;
         }
 
         final targetTile = current.tiles[newPos];
@@ -38,7 +51,9 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
         } else if (targetTile.type == TileType.penalty) {
           updatedPicarats = max(0, updatedPicarats - 5);
         } else if (targetTile.type == TileType.puzzle) {
-          puzzleToTrigger = targetTile.puzzleId;
+          if (!current.solvedPuzzleIds.contains(targetTile.puzzleId)) {
+            puzzleToTrigger = targetTile.puzzleId;
+          }
         }
 
         final updatedBoardState = current.copyWith(
@@ -57,15 +72,22 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     on<PuzzleSolvedOnBoardEvent>((event, emit) {
       if (state is BoardReady) {
         final current = (state as BoardReady).boardState;
-        final solvedList = List<String>.from(current.solvedPuzzleIds)
-          ..add(event.puzzleId);
+        final solvedList = List<String>.from(current.solvedPuzzleIds);
+        if (!solvedList.contains(event.puzzleId)) {
+          solvedList.add(event.puzzleId);
+        }
 
         final updatedBoardState = current.copyWith(
           totalPicarats: current.totalPicarats + event.picaratsEarned,
           solvedPuzzleIds: solvedList,
         );
 
-        emit(BoardReady(boardState: updatedBoardState, triggerPuzzleId: null));
+        final maxIndex = current.tiles.length - 1;
+        if (current.currentPosition >= maxIndex) {
+          emit(BoardFinished(updatedBoardState));
+        } else {
+          emit(BoardReady(boardState: updatedBoardState, triggerPuzzleId: null));
+        }
       }
     });
   }

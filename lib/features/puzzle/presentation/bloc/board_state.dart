@@ -8,7 +8,7 @@ abstract class BoardState extends Equatable {
   List<Object?> get props => [];
 }
 
-class BoardInitial extends BoardState {}
+class BoardWelcomeState extends BoardState {}
 
 class BoardLoading extends BoardState {}
 
@@ -23,6 +23,15 @@ class BoardReady extends BoardState {
 
   @override
   List<Object?> get props => [boardState, triggerPuzzleId];
+}
+
+class BoardFinished extends BoardState {
+  final GameBoardState boardState;
+
+  const BoardFinished(this.boardState);
+
+  @override
+  List<Object?> get props => [boardState];
 }
 
 class BoardError extends BoardState {

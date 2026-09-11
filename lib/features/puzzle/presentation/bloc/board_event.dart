@@ -7,7 +7,14 @@ abstract class BoardEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class InitBoardEvent extends BoardEvent {}
+class InitBoardEvent extends BoardEvent {
+  final String playerName;
+
+  const InitBoardEvent(this.playerName);
+
+  @override
+  List<Object?> get props => [playerName];
+}
 
 class RollDiceEvent extends BoardEvent {}
 

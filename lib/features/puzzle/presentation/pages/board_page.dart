@@ -8,8 +8,21 @@ import '../bloc/puzzle_bloc.dart';
 import '../bloc/puzzle_event.dart';
 import 'puzzle_page.dart';
 
-class BoardPage extends StatelessWidget {
+class BoardPage extends StatefulWidget {
   const BoardPage({super.key});
+
+  @override
+  State<BoardPage> createState() => _BoardPageState();
+}
+
+class _BoardPageState extends State<BoardPage> {
+  final TextEditingController _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +36,8 @@ class BoardPage extends StatelessWidget {
         listener: (context, state) {
           if (state is BoardReady && state.triggerPuzzleId != null) {
             final puzzleId = state.triggerPuzzleId!;
-            
-            // Cargar puzle en PuzzleBloc y navegar
             context.read<PuzzleBloc>().add(LoadPuzzleEvent(puzzleId));
-            
+
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -36,19 +47,133 @@ class BoardPage extends StatelessWidget {
                 ),
               ),
             ).then((_) {
-              // Limpiar disparador al volver
               context.read<BoardBloc>().add(PuzzleSolvedOnBoardEvent(
-                puzzleId: puzzleId,
-                picaratsEarned: 0,
-              ));
+                    puzzleId: puzzleId,
+                    picaratsEarned: 0,
+                  ));
             });
           }
         },
         builder: (context, state) {
-          if (state is BoardLoading) {
+          if (state is BoardWelcomeState) {
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Container(
+                  padding: const EdgeInsets.all(24.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3CD),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.amber, width: 3),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.person_pin, size: 64, color: Colors.brown),
+                      const SizedBox(height: 16),
+                      const Text(
+                        '¡Bienvenido al Desafío!',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Introduce tu nombre para registrar tu puntuación final de Picarats.',
+                        style: TextStyle(fontSize: 14, color: Colors.brown),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nombre del Jugador',
+                          labelStyle: TextStyle(color: Colors.brown),
+                          border: OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.amber, width: 2)),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Comenzar Aventura', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          final name = _nameController.text.trim();
+                          context.read<BoardBloc>().add(InitBoardEvent(name));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          } else if (state is BoardLoading) {
             return const Center(child: CircularProgressIndicator(color: Colors.amber));
+          } else if (state is BoardFinished) {
+            final board = state.boardState;
+            return Center(
+              child: Container(
+                margin: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3CD),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.amber, width: 3),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.emoji_events, size: 64, color: Colors.amber),
+                    const SizedBox(height: 16),
+                    Text(
+                      '¡Enhorabuena, ${board.playerName}!',
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Has completado el tablero con un total de:',
+                      style: const TextStyle(fontSize: 15, color: Colors.brown),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade200,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber.shade800, width: 2),
+                      ),
+                      child: Text(
+                        '${board.totalPicarats} Picarats',
+                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Nueva Partida', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        _nameController.clear();
+                        context.read<BoardBloc>().add(InitBoardEvent(''));
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
           } else if (state is BoardReady) {
             final board = state.boardState;
+            final isAtEnd = board.currentPosition >= board.tiles.length - 1;
 
             return Column(
               children: [
@@ -59,9 +184,18 @@ class BoardPage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Picarats totales: ${board.totalPicarats}',
-                        style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            board.playerName,
+                            style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            'Picarats: ${board.totalPicarats}',
+                            style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                       Text(
                         'Posición: ${board.currentPosition + 1} / ${board.tiles.length}',
@@ -144,15 +278,20 @@ class BoardPage extends StatelessWidget {
                         ),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
+                          backgroundColor: isAtEnd ? Colors.grey : Colors.amber,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
                         icon: const Icon(Icons.casino),
-                        label: const Text('Lanzar Dado', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        onPressed: () {
-                          context.read<BoardBloc>().add(RollDiceEvent());
-                        },
+                        label: Text(
+                          isAtEnd ? 'Fin del Recorrido' : 'Lanzar Dado',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: isAtEnd
+                            ? null
+                            : () {
+                                context.read<BoardBloc>().add(RollDiceEvent());
+                              },
                       ),
                     ],
                   ),

@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => di.sl<BoardBloc>()..add(InitBoardEvent()),
+          create: (_) => di.sl<BoardBloc>()..add(InitBoardEvent('')),
         ),
         BlocProvider(
           create: (_) => di.sl<PuzzleBloc>(),

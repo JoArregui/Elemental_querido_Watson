@@ -47,6 +47,7 @@ class GenerateBoard implements UseCase<GameBoardState, NoParams> {
       }
 
       final initialState = GameBoardState(
+        playerName: '',
         currentPosition: 0,
         totalPicarats: 0,
         tiles: tiles,
