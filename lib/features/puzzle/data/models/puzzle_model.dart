@@ -8,6 +8,10 @@ class PuzzleModel extends Puzzle {
     required super.Picarats,
     required super.correctAnswer,
     required super.hintText,
+    super.type = PuzzleType.textInput,
+    super.options = const [],
+    super.visualKind,
+    super.visualPayload,
   });
 
   factory PuzzleModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +22,13 @@ class PuzzleModel extends Puzzle {
       Picarats: json['picarats'],
       correctAnswer: json['correctAnswer'],
       hintText: json['hintText'],
+      type: PuzzleType.values.firstWhere(
+        (e) => e.name == (json['type'] ?? 'textInput'),
+        orElse: () => PuzzleType.textInput,
+      ),
+      options: List<String>.from(json['options'] ?? const []),
+      visualKind: json['visualKind'],
+      visualPayload: json['visualPayload'],
     );
   }
 
@@ -29,6 +40,10 @@ class PuzzleModel extends Puzzle {
       'picarats': Picarats,
       'correctAnswer': correctAnswer,
       'hintText': hintText,
+      'type': type.name,
+      'options': options,
+      'visualKind': visualKind,
+      'visualPayload': visualPayload,
     };
   }
 }

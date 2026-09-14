@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'features/puzzle/presentation/bloc/board_bloc.dart';
-import 'features/puzzle/presentation/bloc/board_event.dart';
-import 'features/puzzle/presentation/bloc/puzzle_bloc.dart';
-import 'features/puzzle/presentation/pages/board_page.dart';
+import 'features/book/presentation/bloc/library_bloc.dart';
+import 'features/book/presentation/bloc/library_event.dart';
+import 'features/book/presentation/pages/library_page.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -17,22 +16,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => di.sl<BoardBloc>()..add(InitBoardEvent('')),
-        ),
-        BlocProvider(
-          create: (_) => di.sl<PuzzleBloc>(),
-        ),
-      ],
+    return BlocProvider(
+      create: (_) => di.sl<LibraryBloc>()..add(const LoadLibraryEvent()),
       child: MaterialApp(
-        title: 'Profesor Layton - Tablero Dinámico',
+        title: 'Layton - Biblioteca de Acertijos',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.amber,
         ),
-        home: const BoardPage(),
+        home: const LibraryPage(),
       ),
     );
   }
