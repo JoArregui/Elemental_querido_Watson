@@ -1,6 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:elemental_querido_watson/features/book/data/datasources/book_local_data_source.dart';
 import 'package:elemental_querido_watson/features/book/data/repositories/book_progress_repository.dart';
+import 'package:elemental_querido_watson/features/book/data/services/tts_service.dart';
+import 'package:elemental_querido_watson/features/book/presentation/bloc/book_bloc.dart';
+import 'package:elemental_querido_watson/features/book/presentation/bloc/book_event.dart';
+import 'package:elemental_querido_watson/features/book/presentation/pages/book_reader_page.dart';
 import 'package:elemental_querido_watson/features/puzzle/data/datasources/puzzle_local_data_source.dart';
 import 'package:elemental_querido_watson/main.dart';
 import 'package:elemental_querido_watson/injection_container.dart' as di;
@@ -19,7 +26,7 @@ void main() {
 
     // Splash de presentación con el título.
     expect(find.text('Elemental, querido Watson'), findsOneWidget);
-    expect(find.text('Baker Street · 1895'), findsOneWidget);
+    expect(find.text('Baker Street 221B, Londres'), findsOneWidget);
 
     // Tras 3.5 segundos entra en la biblioteca (que ya cargó de fondo).
     // Se avanza también el fundido de 600ms para que la splash salga del árbol.
@@ -98,5 +105,57 @@ void main() {
     await fresh.init();
     expect(fresh.hasSave, isFalse);
     expect(fresh.lastBookId, isNull);
+  });
+
+  testWidgets('El lector ofrece audiolibro y tamaño de letra',
+      (WidgetTester tester) async {
+    // El motor de voz no existe en tests: se simula el canal.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter_tts'),
+      (call) async => 1,
+    );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+              const MethodChannel('flutter_tts'), null);
+    });
+    if (!di.sl.isRegistered<TtsService>()) {
+      di.sl.registerLazySingleton(() => TtsService());
+    }
+    final ds = BookLocalDataSourceImpl(
+        classicPuzzles: PuzzleLocalDataSourceImpl());
+    final progress = BookProgressRepository();
+    await progress.init();
+    final bloc = BookBloc(dataSource: ds, progress: progress)
+      ..add(const LoadBookEvent('lighthouse'));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BlocProvider.value(
+          value: bloc,
+          child: const BookReaderPage(bookId: 'lighthouse'),
+        ),
+      ),
+    );
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pump();
+
+    expect(find.byTooltip('Escuchar página (audiolibro)'), findsOneWidget);
+    expect(find.byTooltip('Tamaño de letra'), findsOneWidget);
+
+    // Activar y detener la lectura no debe romper nada.
+    await tester.tap(find.byTooltip('Escuchar página (audiolibro)'));
+    await tester.pump();
+    expect(find.byTooltip('Detener audiolibro'), findsOneWidget);
+    await tester.tap(find.byTooltip('Detener audiolibro'));
+    await tester.pump();
+    expect(find.byTooltip('Escuchar página (audiolibro)'), findsOneWidget);
+
+    // Cambiar el tamaño de letra tampoco.
+    await tester.tap(find.byTooltip('Tamaño de letra'));
+    await tester.pump();
   });
 }

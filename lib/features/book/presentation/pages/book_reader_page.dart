@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../injection_container.dart' as di;
+import '../../data/services/tts_service.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/book_state.dart';
@@ -19,6 +22,9 @@ class BookReaderPage extends StatefulWidget {
 class _BookReaderPageState extends State<BookReaderPage> {
   late final PageController _pageController;
   bool _syncing = false;
+  bool _isReading = false;
+  double _textScale = 1.0;
+  TtsService? _tts;
 
   @override
   void initState() {
@@ -28,8 +34,49 @@ class _BookReaderPageState extends State<BookReaderPage> {
 
   @override
   void dispose() {
+    // Sin setState: el elemento ya se está desmontando.
+    _isReading = false;
+    unawaited(_tts?.stop());
     _pageController.dispose();
     super.dispose();
+  }
+
+  TtsService _ttsService() {
+    final svc = _tts ??= di.sl<TtsService>();
+    svc.onComplete = () {
+      if (mounted) setState(() => _isReading = false);
+    };
+    return svc;
+  }
+
+  /// Lee en voz alta la página actual (historia + acertijo).
+  Future<void> _toggleReading(BookLoaded state) async {
+    if (_isReading) {
+      await _stopReading();
+      return;
+    }
+    final page = state.currentPage;
+    final text = '${page.storyTitle}. ${page.storyText} '
+        'Acertijo de la página ${page.pageNumber}: '
+        '${page.puzzle.title}. ${page.puzzle.statement}';
+    setState(() => _isReading = true);
+    await _ttsService().speak(text);
+  }
+
+  Future<void> _stopReading() async {
+    if (!_isReading && _tts == null) return;
+    setState(() => _isReading = false);
+    await _ttsService().stop();
+  }
+
+  void _cycleTextScale() {
+    setState(() {
+      _textScale = _textScale >= 1.6
+          ? 1.0
+          : _textScale >= 1.3
+              ? 1.6
+              : 1.3;
+    });
   }
 
   void _goTo(int index, BookLoaded state) {
@@ -157,14 +204,37 @@ class _BookReaderPageState extends State<BookReaderPage> {
         actions: [
           BlocBuilder<BookBloc, BookState>(
             builder: (context, state) {
-              if (state is BookLoaded) {
-                return IconButton(
-                  icon: const Icon(Icons.menu_book, color: Colors.amber),
-                  tooltip: 'Índice',
-                  onPressed: () => _showIndex(context, state),
-                );
+              if (state is! BookLoaded) {
+                return const SizedBox.shrink();
               }
-              return const SizedBox.shrink();
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.format_size,
+                        color: Colors.amber),
+                    tooltip: 'Tamaño de letra',
+                    onPressed: _cycleTextScale,
+                  ),
+                  IconButton(
+                    icon: Icon(
+                        _isReading
+                            ? Icons.stop_circle
+                            : Icons.volume_up,
+                        color: Colors.amber),
+                    tooltip: _isReading
+                        ? 'Detener audiolibro'
+                        : 'Escuchar página (audiolibro)',
+                    onPressed: () => _toggleReading(state),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.menu_book,
+                        color: Colors.amber),
+                    tooltip: 'Índice',
+                    onPressed: () => _showIndex(context, state),
+                  ),
+                ],
+              );
             },
           ),
         ],
@@ -176,6 +246,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
                 (b.currentIndex != (a).currentIndex)),
         listener: (context, state) {
           if (state is BookLoaded && _pageController.hasClients) {
+            unawaited(_stopReading());
             _syncing = true;
             _pageController.animateToPage(
               state.currentIndex,
@@ -371,8 +442,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
             const SizedBox(height: 4),
             Text(
               page.storyTitle,
-              style: const TextStyle(
-                fontSize: 21,
+              style: TextStyle(
+                fontSize: 21 * _textScale,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
                 fontFamily: 'serif',
@@ -381,8 +452,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
             const Divider(color: Colors.amber, thickness: 1.5),
             Text(
               page.storyText,
-              style: const TextStyle(
-                fontSize: 15,
+              style: TextStyle(
+                fontSize: 15 * _textScale,
                 height: 1.55,
                 color: Colors.black87,
               ),
@@ -411,6 +482,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
             PuzzleCard(
               puzzle: page.puzzle,
               isSolved: solved,
+              textScale: _textScale,
               lastAnswerCorrect:
                   isCurrent ? state.lastAnswerCorrect : null,
               failedAttempts:

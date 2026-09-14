@@ -9,6 +9,7 @@ class PuzzleCard extends StatefulWidget {
   final bool? lastAnswerCorrect;
   final int failedAttempts;
   final void Function(String answer) onSubmit;
+  final double textScale;
 
   const PuzzleCard({
     super.key,
@@ -17,6 +18,7 @@ class PuzzleCard extends StatefulWidget {
     required this.lastAnswerCorrect,
     required this.failedAttempts,
     required this.onSubmit,
+    this.textScale = 1.0,
   });
 
   @override
@@ -101,7 +103,9 @@ class _PuzzleCardState extends State<PuzzleCard> {
           ),
           const SizedBox(height: 12),
           Text(p.statement,
-              style: const TextStyle(fontSize: 15, color: Colors.black87)),
+              style: TextStyle(
+                  fontSize: 15 * widget.textScale,
+                  color: Colors.black87)),
           if (p.visualKind != null)
             VisualPuzzleWidget(
                 visualKind: p.visualKind, visualPayload: p.visualPayload),

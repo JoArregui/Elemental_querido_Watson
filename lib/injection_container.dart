@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'features/book/data/datasources/book_local_data_source.dart';
 import 'features/book/data/repositories/book_progress_repository.dart';
+import 'features/book/data/services/tts_service.dart';
 import 'features/book/presentation/bloc/book_bloc.dart';
 import 'features/book/presentation/bloc/library_bloc.dart';
 import 'features/puzzle/data/datasources/puzzle_local_data_source.dart';
@@ -43,6 +44,9 @@ Future<void> init() async {
   final progressRepo = BookProgressRepository();
   await progressRepo.init();
   sl.registerSingleton<BookProgressRepository>(progressRepo);
+
+  // Voz para el modo audiolibro (se inicializa al primer uso).
+  sl.registerLazySingleton(() => TtsService());
 
   // Data sources
   sl.registerLazySingleton<PuzzleLocalDataSource>(
