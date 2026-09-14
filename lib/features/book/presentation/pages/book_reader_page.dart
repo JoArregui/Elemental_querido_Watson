@@ -7,6 +7,7 @@ import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/book_state.dart';
 import '../widgets/puzzle_card.dart';
+import '../widgets/solved_celebration.dart';
 
 /// Lector de un libro-etapa con efecto de pasar páginas.
 class BookReaderPage extends StatefulWidget {
@@ -239,7 +240,9 @@ class _BookReaderPageState extends State<BookReaderPage> {
           ),
         ],
       ),
-      body: BlocConsumer<BookBloc, BookState>(
+      body: Stack(
+        children: [
+          BlocConsumer<BookBloc, BookState>(
         listenWhen: (a, b) =>
             b is BookLoaded &&
             (a is! BookLoaded ||
@@ -350,6 +353,27 @@ class _BookReaderPageState extends State<BookReaderPage> {
             ],
           );
         },
+      ),
+          // Celebración de 3,2 s al resolver el acertijo de la página.
+          BlocBuilder<BookBloc, BookState>(
+            builder: (context, state) {
+              if (state is BookLoaded &&
+                  state.lastAnswerCorrect == true &&
+                  state.isCurrentSolved) {
+                final page = state.currentPage;
+                return SolvedCelebration(
+                  pageNumber: page.pageNumber,
+                  pageCount: state.pages.length,
+                  indicios: page.puzzle.indicios,
+                  onDone: () => context
+                      .read<BookBloc>()
+                      .add(const ClearPageResultEvent()),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
     );
   }

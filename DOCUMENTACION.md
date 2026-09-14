@@ -15,6 +15,7 @@ con un acertijo. Resolverlo desbloquea la página siguiente.
 |---|---|
 | Biblioteca | Home con 6 libros-etapa, cada uno con portada, progreso y bloqueo por etapas |
 | Lectura | `PageView` con efecto libro, historia + 1 acertijo por página |
+| Celebración | Animación de ~3,2 s al resolver cada página (✔ elástico, estrellas, indicios; se salta tocando) |
 | Acertijos | 90 distintos (texto, opción múltiple y visuales dibujados con widgets) |
 | Guardado | Partida persistente: progreso, indicios y última posición |
 | Continuar | Botón para retomar donde se dejó; *Nueva partida* con confirmación |

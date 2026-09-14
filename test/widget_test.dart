@@ -109,6 +109,11 @@ void main() {
 
   testWidgets('El lector ofrece audiolibro y tamaño de letra',
       (WidgetTester tester) async {
+    // Viewport alto para que la tarjeta quepa sin hacer scroll.
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     // El motor de voz no existe en tests: se simula el canal.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -157,5 +162,18 @@ void main() {
     // Cambiar el tamaño de letra tampoco.
     await tester.tap(find.byTooltip('Tamaño de letra'));
     await tester.pump();
+
+    // Resolver la página 1 (puzle 007, respuesta "2") muestra la
+    // celebración de ~3.2s y luego el botón de pasar página.
+    await tester.enterText(find.byType(TextField).first, '2');
+    await tester.tap(find.text('Responder').first);
+    await tester.pump();
+    expect(find.text('¡Página 1 resuelta!'), findsOneWidget);
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    await tester.pump();
+    expect(find.text('¡Página 1 resuelta!'), findsNothing);
+    expect(find.text('Pasar la página →'), findsOneWidget);
   });
 }
