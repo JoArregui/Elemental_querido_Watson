@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/book/presentation/bloc/library_bloc.dart';
 import 'features/book/presentation/bloc/library_event.dart';
-import 'features/book/presentation/pages/library_page.dart';
+import 'features/book/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -19,12 +19,12 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (_) => di.sl<LibraryBloc>()..add(const LoadLibraryEvent()),
       child: MaterialApp(
-        title: 'Layton - Biblioteca de Acertijos',
+        title: 'Elemental, querido Watson',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.amber,
         ),
-        home: const LibraryPage(),
+        home: const SplashPage(),
       ),
     );
   }

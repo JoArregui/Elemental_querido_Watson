@@ -10,7 +10,7 @@ class Puzzle extends Equatable {
   final String id;
   final String title;
   final String statement;
-  final int Picarats;
+  final int indicios;
   final String correctAnswer;
   final String hintText;
   final PuzzleType type;
@@ -22,7 +22,7 @@ class Puzzle extends Equatable {
     required this.id,
     required this.title,
     required this.statement,
-    required this.Picarats,
+    required this.indicios,
     required this.correctAnswer,
     required this.hintText,
     this.type = PuzzleType.textInput,
@@ -42,5 +42,5 @@ class Puzzle extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, title, statement, Picarats, correctAnswer, hintText, type, options, visualKind, visualPayload];
+      [id, title, statement, indicios, correctAnswer, hintText, type, options, visualKind, visualPayload];
 }

@@ -21,7 +21,7 @@ class BookLoaded extends BookState {
   final List<BookPage> pages;
   final int currentIndex;
   final Set<String> solvedPuzzleIds;
-  final int totalPicarats;
+  final int totalIndicios;
   final bool? lastAnswerCorrect;
   final int failedAttemptsOnPage;
 
@@ -30,7 +30,7 @@ class BookLoaded extends BookState {
     required this.pages,
     required this.currentIndex,
     required this.solvedPuzzleIds,
-    required this.totalPicarats,
+    required this.totalIndicios,
     this.lastAnswerCorrect,
     this.failedAttemptsOnPage = 0,
   });
@@ -58,7 +58,7 @@ class BookLoaded extends BookState {
     List<BookPage>? pages,
     int? currentIndex,
     Set<String>? solvedPuzzleIds,
-    int? totalPicarats,
+    int? totalIndicios,
     bool? Function()? lastAnswerCorrect,
     int? failedAttemptsOnPage,
   }) {
@@ -67,7 +67,7 @@ class BookLoaded extends BookState {
       pages: pages ?? this.pages,
       currentIndex: currentIndex ?? this.currentIndex,
       solvedPuzzleIds: solvedPuzzleIds ?? this.solvedPuzzleIds,
-      totalPicarats: totalPicarats ?? this.totalPicarats,
+      totalIndicios: totalIndicios ?? this.totalIndicios,
       lastAnswerCorrect:
           lastAnswerCorrect != null ? lastAnswerCorrect() : this.lastAnswerCorrect,
       failedAttemptsOnPage:
@@ -81,7 +81,7 @@ class BookLoaded extends BookState {
         pages,
         currentIndex,
         solvedPuzzleIds,
-        totalPicarats,
+        totalIndicios,
         lastAnswerCorrect,
         failedAttemptsOnPage,
       ];

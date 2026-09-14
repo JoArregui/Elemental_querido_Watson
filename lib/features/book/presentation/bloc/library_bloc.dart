@@ -18,6 +18,10 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
     on<RefreshLibraryEvent>((event, emit) async {
       await _load(emit);
     });
+    on<ResetAllProgressEvent>((event, emit) async {
+      await progress.resetAll();
+      await _load(emit);
+    });
   }
 
   Future<void> _load(Emitter<LibraryState> emit) async {
@@ -25,10 +29,10 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
       final books = await dataSource.getLibrary();
       final solvedCounts = <String, int>{};
       final completed = <String>{};
-      final picarats = <String, int>{};
+      final indicios = <String, int>{};
       for (final b in books) {
         solvedCounts[b.id] = progress.solvedCount(b.id);
-        picarats[b.id] = progress.picaratsFor(b.id);
+        indicios[b.id] = progress.indiciosFor(b.id);
         if (progress.isBookCompleted(b.id, b.pageCount)) {
           completed.add(b.id);
         }
@@ -37,8 +41,11 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
         books: books,
         solvedCounts: solvedCounts,
         completedBookIds: completed,
-        picaratsPerBook: picarats,
-        totalPicarats: progress.totalPicarats(),
+        indiciosPerBook: indicios,
+        totalIndicios: progress.totalIndicios(),
+        lastBookId: progress.lastBookId,
+        lastPageIndex: progress.lastPageIndex,
+        hasSave: progress.hasSave,
       ));
     } catch (_) {
       emit(const LibraryError('No se pudo abrir la biblioteca.'));

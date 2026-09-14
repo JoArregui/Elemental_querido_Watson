@@ -8,7 +8,9 @@ import '../widgets/puzzle_card.dart';
 /// Lector de un libro-etapa con efecto de pasar páginas.
 class BookReaderPage extends StatefulWidget {
   final String bookId;
-  const BookReaderPage({super.key, required this.bookId});
+  final int initialPage;
+  const BookReaderPage(
+      {super.key, required this.bookId, this.initialPage = 0});
 
   @override
   State<BookReaderPage> createState() => _BookReaderPageState();
@@ -61,7 +63,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
                 style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.bold)),
             Text(
-                '${state.solvedCount} / ${state.pages.length} acertijos · ${state.totalPicarats} Picarats',
+                '${state.solvedCount} / ${state.pages.length} acertijos · ${state.totalIndicios} indicios',
                 style: const TextStyle(color: Colors.brown)),
             const SizedBox(height: 12),
             Flexible(
@@ -196,9 +198,9 @@ class _BookReaderPageState extends State<BookReaderPage> {
                       style: const TextStyle(color: Colors.red)),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<BookBloc>()
-                        .add(LoadBookEvent(widget.bookId)),
+                    onPressed: () => context.read<BookBloc>().add(
+                        LoadBookEvent(widget.bookId,
+                            initialPage: widget.initialPage)),
                     child: const Text('Reintentar'),
                   ),
                 ],
@@ -303,7 +305,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '⭐ ${state.totalPicarats}',
+                  '⭐ ${state.totalIndicios}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, color: Colors.black),
                 ),
@@ -534,8 +536,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
               const SizedBox(height: 8),
               Text(
                 state.book.stage == 1
-                    ? 'La torre de Nebelheim vuelve a latir. Layton cierra el libro y Luke sonríe: "Toda historia digna termina… con otro misterio".'
-                    : '"${state.book.title}" queda resuelto. Layton sonríe: "Toda historia digna termina… con otro misterio".',
+                    ? 'La torre de Nebelheim vuelve a latir. Holmes cierra su violín y yo sonrío: "Todo caso digno termina… con otro misterio".'
+                    : '"${state.book.title}" queda resuelto. Holmes enciende su pipa: "Es elemental, querido Watson".',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14, height: 1.5),
               ),
@@ -550,7 +552,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
                       Border.all(color: Colors.amber.shade800, width: 2),
                 ),
                 child: Text(
-                  '⭐ ${state.totalPicarats} Picarats · ${state.solvedCount}/${state.pages.length}',
+                  '⭐ ${state.totalIndicios} indicios · ${state.solvedCount}/${state.pages.length}',
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.bold),
                 ),

@@ -38,8 +38,11 @@ Future<void> init() async {
     () => PuzzleRepositoryImpl(localDataSource: sl()),
   );
 
-  // Progreso entre biblioteca y lector
-  sl.registerLazySingleton(() => BookProgressRepository());
+  // Progreso persistente entre biblioteca y lector.
+  // Se inicializa (carga la partida guardada) antes de registrarlo.
+  final progressRepo = BookProgressRepository();
+  await progressRepo.init();
+  sl.registerSingleton<BookProgressRepository>(progressRepo);
 
   // Data sources
   sl.registerLazySingleton<PuzzleLocalDataSource>(

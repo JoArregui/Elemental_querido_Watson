@@ -1,30 +1,50 @@
-/// Guarda en memoria el progreso del jugador en cada libro.
-/// Sobrevive a la navegación entre la biblioteca y el lector.
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Progreso del jugador persistido en el dispositivo.
+/// Permite guardar la partida, retomarla en otro momento
+/// o empezar una nueva desde cero.
 class BookProgressRepository {
+  static const _solvedPrefix = 'progress_solved_';
+  static const _indiciosPrefix = 'progress_picarats_';
+  static const _lastBookKey = 'progress_last_book';
+  static const _lastPageKey = 'progress_last_page';
+
   final Map<String, Set<String>> _solvedByBook = {};
-  final Map<String, int> _picaratsByBook = {};
+  final Map<String, int> _indiciosByBook = {};
+  String? _lastBookId;
+  int _lastPageIndex = 0;
+  bool _ready = false;
+
+  /// Carga la partida guardada (si existe). Llamar una vez al arrancar.
+  Future<void> init() async {
+    if (_ready) return;
+    final prefs = await SharedPreferences.getInstance();
+    _lastBookId = prefs.getString(_lastBookKey);
+    _lastPageIndex = prefs.getInt(_lastPageKey) ?? 0;
+
+    for (final key in prefs.getKeys()) {
+      if (key.startsWith(_solvedPrefix)) {
+        final bookId = key.substring(_solvedPrefix.length);
+        _solvedByBook[bookId] =
+            Set<String>.from(prefs.getStringList(key) ?? const []);
+      } else if (key.startsWith(_indiciosPrefix)) {
+        final bookId = key.substring(_indiciosPrefix.length);
+        _indiciosByBook[bookId] = prefs.getInt(key) ?? 0;
+      }
+    }
+    _ready = true;
+  }
+
+  // ── Lecturas (síncronas, desde memoria) ──
 
   Set<String> solvedFor(String bookId) {
     return Set<String>.from(_solvedByBook[bookId] ?? const {});
   }
 
-  int picaratsFor(String bookId) => _picaratsByBook[bookId] ?? 0;
+  int indiciosFor(String bookId) => _indiciosByBook[bookId] ?? 0;
 
-  int totalPicarats() =>
-      _picaratsByBook.values.fold(0, (a, b) => a + b);
-
-  /// Devuelve true si el acertijo se resolvía por primera vez.
-  bool markSolved({
-    required String bookId,
-    required String puzzleId,
-    required int picarats,
-  }) {
-    final solved = _solvedByBook.putIfAbsent(bookId, () => <String>{});
-    if (solved.contains(puzzleId)) return false;
-    solved.add(puzzleId);
-    _picaratsByBook[bookId] = picaratsFor(bookId) + picarats;
-    return true;
-  }
+  int totalIndicios() =>
+      _indiciosByBook.values.fold(0, (a, b) => a + b);
 
   bool isBookCompleted(String bookId, int pageCount) {
     return (_solvedByBook[bookId]?.length ?? 0) >= pageCount &&
@@ -33,8 +53,68 @@ class BookProgressRepository {
 
   int solvedCount(String bookId) => _solvedByBook[bookId]?.length ?? 0;
 
-  void resetBook(String bookId) {
+  /// ¿Hay alguna partida empezada (con al menos un acertijo resuelto)?
+  bool get hasSave =>
+      _solvedByBook.values.any((s) => s.isNotEmpty);
+
+  String? get lastBookId => _lastBookId;
+  int get lastPageIndex => _lastPageIndex;
+
+  // ── Escrituras (persisten en el dispositivo) ──
+
+  /// Devuelve true si el acertijo se resolvía por primera vez.
+  Future<bool> markSolved({
+    required String bookId,
+    required String puzzleId,
+    required int indicios,
+  }) async {
+    final solved = _solvedByBook.putIfAbsent(bookId, () => <String>{});
+    if (solved.contains(puzzleId)) return false;
+    solved.add(puzzleId);
+    _indiciosByBook[bookId] = indiciosFor(bookId) + indicios;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        '$_solvedPrefix$bookId', solved.toList());
+    await prefs.setInt(
+        '$_indiciosPrefix$bookId', _indiciosByBook[bookId]!);
+    return true;
+  }
+
+  /// Recuerda dónde estaba el jugador para poder retomarlo.
+  Future<void> saveLastPosition({
+    required String bookId,
+    required int pageIndex,
+  }) async {
+    _lastBookId = bookId;
+    _lastPageIndex = pageIndex;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastBookKey, bookId);
+    await prefs.setInt(_lastPageKey, pageIndex);
+  }
+
+  Future<void> resetBook(String bookId) async {
     _solvedByBook.remove(bookId);
-    _picaratsByBook.remove(bookId);
+    _indiciosByBook.remove(bookId);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('$_solvedPrefix$bookId');
+    await prefs.remove('$_indiciosPrefix$bookId');
+  }
+
+  /// Nueva partida: borra todo el progreso y la última posición.
+  Future<void> resetAll() async {
+    _solvedByBook.clear();
+    _indiciosByBook.clear();
+    _lastBookId = null;
+    _lastPageIndex = 0;
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in prefs.getKeys().toList()) {
+      if (key.startsWith(_solvedPrefix) ||
+          key.startsWith(_indiciosPrefix) ||
+          key == _lastBookKey ||
+          key == _lastPageKey) {
+        await prefs.remove(key);
+      }
+    }
   }
 }

@@ -16,23 +16,33 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       emit(const BookLoading());
       try {
         final book = await dataSource.getBook(event.bookId);
+        var start = event.initialPage.clamp(0, book.pages.length - 1);
+        final solved = progress.solvedFor(book.id);
+        // Nunca arranques en una página bloqueada.
+        if (start > 0 &&
+            !solved.contains(book.pages[start - 1].puzzle.id)) {
+          start = 0;
+        }
+        await progress.saveLastPosition(bookId: book.id, pageIndex: start);
         emit(BookLoaded(
           book: book,
           pages: book.pages,
-          currentIndex: 0,
-          solvedPuzzleIds: progress.solvedFor(book.id),
-          totalPicarats: progress.picaratsFor(book.id),
+          currentIndex: start,
+          solvedPuzzleIds: solved,
+          totalIndicios: progress.indiciosFor(book.id),
         ));
       } catch (_) {
         emit(const BookError('No se pudo abrir el libro. Inténtalo de nuevo.'));
       }
     });
 
-    on<GoToPageEvent>((event, emit) {
+    on<GoToPageEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
         if (event.pageIndex < 0 || event.pageIndex >= s.pages.length) return;
         if (!s.isPageUnlocked(event.pageIndex)) return;
+        await progress.saveLastPosition(
+            bookId: s.book.id, pageIndex: event.pageIndex);
         emit(s.copyWith(
           currentIndex: event.pageIndex,
           lastAnswerCorrect: () => null,
@@ -41,10 +51,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       }
     });
 
-    on<NextPageEvent>((event, emit) {
+    on<NextPageEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
         if (!s.canGoNext) return;
+        await progress.saveLastPosition(
+            bookId: s.book.id, pageIndex: s.currentIndex + 1);
         emit(s.copyWith(
           currentIndex: s.currentIndex + 1,
           lastAnswerCorrect: () => null,
@@ -53,10 +65,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       }
     });
 
-    on<PreviousPageEvent>((event, emit) {
+    on<PreviousPageEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
         if (s.currentIndex == 0) return;
+        await progress.saveLastPosition(
+            bookId: s.book.id, pageIndex: s.currentIndex - 1);
         emit(s.copyWith(
           currentIndex: s.currentIndex - 1,
           lastAnswerCorrect: () => null,
@@ -65,21 +79,21 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       }
     });
 
-    on<SubmitPageAnswerEvent>((event, emit) {
+    on<SubmitPageAnswerEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
         final puzzle = s.currentPage.puzzle;
         final isCorrect = puzzle.checkAnswer(event.answer);
         if (isCorrect) {
-          progress.markSolved(
+          await progress.markSolved(
             bookId: s.book.id,
             puzzleId: puzzle.id,
-            picarats: puzzle.Picarats,
+            indicios: puzzle.indicios,
           );
           final updated = progress.solvedFor(s.book.id);
           emit(s.copyWith(
             solvedPuzzleIds: updated,
-            totalPicarats: progress.picaratsFor(s.book.id),
+            totalIndicios: progress.indiciosFor(s.book.id),
             lastAnswerCorrect: () => true,
           ));
         } else {
@@ -98,14 +112,15 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       }
     });
 
-    on<ResetBookEvent>((event, emit) {
+    on<ResetBookEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
-        progress.resetBook(s.book.id);
+        await progress.resetBook(s.book.id);
+        await progress.saveLastPosition(bookId: s.book.id, pageIndex: 0);
         emit(s.copyWith(
           currentIndex: 0,
           solvedPuzzleIds: <String>{},
-          totalPicarats: 0,
+          totalIndicios: 0,
           lastAnswerCorrect: () => null,
           failedAttemptsOnPage: 0,
         ));

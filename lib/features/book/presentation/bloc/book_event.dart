@@ -8,10 +8,11 @@ abstract class BookEvent extends Equatable {
 
 class LoadBookEvent extends BookEvent {
   final String bookId;
-  const LoadBookEvent(this.bookId);
+  final int initialPage;
+  const LoadBookEvent(this.bookId, {this.initialPage = 0});
 
   @override
-  List<Object?> get props => [bookId];
+  List<Object?> get props => [bookId, initialPage];
 }
 
 class GoToPageEvent extends BookEvent {

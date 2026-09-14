@@ -13,3 +13,7 @@ class LoadLibraryEvent extends LibraryEvent {
 class RefreshLibraryEvent extends LibraryEvent {
   const RefreshLibraryEvent();
 }
+
+class ResetAllProgressEvent extends LibraryEvent {
+  const ResetAllProgressEvent();
+}

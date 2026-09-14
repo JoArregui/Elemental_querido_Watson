@@ -24,12 +24,17 @@ class LibraryPage extends StatelessWidget {
         return Icons.celebration;
       case 'observatory':
         return Icons.star;
+      case 'train':
+        return Icons.train;
+      case 'abbey':
+        return Icons.account_balance;
       default:
         return Icons.menu_book;
     }
   }
 
-  void _openBook(BuildContext context, LibraryLoaded state, int index) {
+  void _openBook(BuildContext context, LibraryLoaded state, int index,
+      {int initialPage = 0}) {
     final book = state.books[index];
     if (!state.isBookUnlocked(index)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,9 +50,10 @@ class LibraryPage extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider(
-          create: (_) =>
-              di.sl<BookBloc>()..add(LoadBookEvent(book.id)),
-      child: BookReaderPage(bookId: book.id),
+          create: (_) => di.sl<BookBloc>()
+            ..add(LoadBookEvent(book.id, initialPage: initialPage)),
+          child: BookReaderPage(
+              bookId: book.id, initialPage: initialPage),
         ),
       ),
     ).then((_) {
@@ -55,6 +61,42 @@ class LibraryPage extends StatelessWidget {
       // ignore: use_build_context_synchronously
       context.read<LibraryBloc>().add(const RefreshLibraryEvent());
     });
+  }
+
+  Future<void> _confirmNewGame(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: const Color(0xFFFFF3CD),
+        title: const Text('¿Empezar una nueva partida?'),
+        content: const Text(
+          'Se borrará todo el progreso guardado: acertijos resueltos, indicios y la última posición. Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: const Text('Borrar y empezar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      context.read<LibraryBloc>().add(const ResetAllProgressEvent());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Partida nueva: la biblioteca vuelve a empezar.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -67,19 +109,39 @@ class LibraryPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Biblioteca Layton',
+            Text('Elemental, querido Watson',
                 style: TextStyle(color: Colors.amber, fontSize: 18)),
-            Text('Cada libro es una etapa con su propia historia',
+            Text('Biblioteca de casos · cada libro es una etapa',
                 style: TextStyle(color: Colors.white54, fontSize: 11),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),
           ],
         ),
         actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.amber),
+            tooltip: 'Opciones de partida',
+            color: const Color(0xFFFFF3CD),
+            onSelected: (value) {
+              if (value == 'new_game') _confirmNewGame(context);
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'new_game',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_forever, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Nueva partida'),
+                  ],
+                ),
+              ),
+            ],
+          ),
           BlocBuilder<LibraryBloc, LibraryState>(
             builder: (context, state) {
               final total =
-                  state is LibraryLoaded ? state.totalPicarats : 0;
+                  state is LibraryLoaded ? state.totalIndicios : 0;
               return Container(
                 margin: const EdgeInsets.only(right: 12),
                 padding: const EdgeInsets.symmetric(
@@ -125,19 +187,69 @@ class LibraryPage extends StatelessWidget {
           }
           if (state is! LibraryLoaded) return const SizedBox.shrink();
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.books.length,
-            itemBuilder: (context, index) {
-              final book = state.books[index];
-              final unlocked = state.isBookUnlocked(index);
-              final solved = state.solvedFor(book.id);
-              final completed =
-                  state.completedBookIds.contains(book.id);
-              return _bookCard(
-                  context, state, index, book, unlocked, solved, completed);
-            },
+          return Column(
+            children: [
+              if (state.hasSave && state.resumeBook != null)
+                _continueCard(context, state),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.books.length,
+                  itemBuilder: (context, index) {
+                    final book = state.books[index];
+                    final unlocked = state.isBookUnlocked(index);
+                    final solved = state.solvedFor(book.id);
+                    final completed =
+                        state.completedBookIds.contains(book.id);
+                    return _bookCard(context, state, index, book,
+                        unlocked, solved, completed);
+                  },
+                ),
+              ),
+            ],
           );
+        },
+      ),
+    );
+  }
+
+  /// Retoma la partida guardada donde se dejó.
+  Widget _continueCard(BuildContext context, LibraryLoaded state) {
+    final book = state.resumeBook!;
+    final page = (state.lastPageIndex + 1).clamp(1, book.pageCount);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.amber,
+          foregroundColor: Colors.black,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        icon: const Icon(Icons.play_circle_fill, size: 28),
+        label: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Continuar partida',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+            Text(
+              '${book.title} · Pág. $page/${book.pageCount}',
+              style: const TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        onPressed: () {
+          final index =
+              state.books.indexWhere((b) => b.id == book.id);
+          if (index < 0) return;
+          _openBook(context, state, index,
+              initialPage: state.lastPageIndex);
         },
       ),
     );

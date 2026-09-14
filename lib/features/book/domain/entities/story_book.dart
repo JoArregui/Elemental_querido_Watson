@@ -26,8 +26,8 @@ class StoryBook extends Equatable {
 
   int get pageCount => pages.length;
 
-  int get totalPicarats =>
-      pages.fold(0, (sum, p) => sum + p.puzzle.Picarats);
+  int get totalIndicios =>
+      pages.fold(0, (sum, p) => sum + p.puzzle.indicios);
 
   @override
   List<Object?> get props =>

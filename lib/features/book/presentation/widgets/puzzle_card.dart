@@ -92,7 +92,7 @@ class _PuzzleCardState extends State<PuzzleCard> {
                   border: Border.all(color: Colors.brown),
                 ),
                 child: Text(
-                  '${p.Picarats} Picarats',
+                  '${p.indicios} indicios',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 12),
                 ),
@@ -237,7 +237,7 @@ class _PuzzleCardState extends State<PuzzleCard> {
                 border: Border.all(color: Colors.red.shade300),
               ),
               child: const Text(
-                'Respuesta incorrecta. ¡Todo caballero persevera!',
+                'Respuesta incorrecta. ¡Todo detective persevera!',
                 style: TextStyle(
                     color: Colors.red, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
@@ -253,7 +253,7 @@ class _PuzzleCardState extends State<PuzzleCard> {
                 border: Border.all(color: Colors.green.shade400),
               ),
               child: Text(
-                '¡Correcto! +${p.Picarats} Picarats',
+                '¡Correcto! +${p.indicios} indicios',
                 style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,

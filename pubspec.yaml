@@ -1,5 +1,5 @@
-name: layton_app
-description: "A new Flutter project."
+name: elemental_querido_watson
+description: "Elemental, querido Watson: biblioteca de casos de Holmes y Watson."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -38,6 +38,7 @@ dependencies:
   dartz: ^0.10.1
   get_it: ^9.2.1
   equatable: ^2.1.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +51,15 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/Icono_Watson.jpg"
+  adaptive_icon_background: "#1A1009"
+  adaptive_icon_foreground: "assets/Icono_Watson.jpg"
+  remove_alpha_ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -61,6 +71,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/Icono_Watson.jpg
+    - assets/Splash_Watson.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -17,9 +17,9 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'La máscara de oro',
       storyTitle: 'Confeti y sospechosos',
       storyText:
-          'Layton y Luke llegan a Belmaro en pleno carnaval: la Máscara de Oro del desfile ha desaparecido y el alcalde acusa al arlequín. '
-          'Entre serpentinas, una niña disfrazada de liebre les entrega una nota del ladrón: "Atrapadme si resolvéis mi carrera". '
-          'Layton se ajusta el sombrero: "Un ladrón que reta con puzles merece una reverencia… y una celda".',
+          'Holmes y yo llegamos a Belmaro en pleno carnaval: la Máscara de Oro del desfile ha desaparecido y el alcalde acusa al arlequín. '
+          'Entre serpentinas, una niña disfrazada de liebre nos entregó una nota del ladrón: "Atrápenme si resuelven mi carrera". '
+          'Holmes se ajustó la gorra: "Un ladrón que reta con enigmas merece una reverencia… y unas esposas".',
       puzzle: byId('020'),
     ),
     BookPage(
@@ -28,8 +28,8 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'La máscara de oro',
       storyTitle: 'El pozo de la plaza',
       storyText:
-          'La primera pista lleva al pozo de la plaza, donde el ladrón dejó caer una careta. Un caracol de agua sube por el brocal resbaladizo '
-          'mientras Luke intenta pescar la careta con una caña. "La paciencia también se calcula", dice Layton cronometrando cada avance del caracol.',
+          'La primera pista llevaba al pozo de la plaza, donde el ladrón dejó caer una careta. Un caracol de agua subía por el brocal resbaladizo '
+          'mientras yo intentaba pescar la careta con una caña. "La paciencia también se calcula", dijo Holmes cronometrando cada avance del caracol.',
       puzzle: byId('021'),
     ),
     BookPage(
@@ -38,8 +38,8 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'La máscara de oro',
       storyTitle: 'Gatos y ratones de atrezo',
       storyText:
-          'En el teatro, el tramoyista jura que tres gatos del decorado cazaron a los ratones de utilería en tiempo récord, justo cuando se apagaron las luces '
-          'y la máscara cambió de manos. "Si los gatos son tan veloces, necesitaremos más ojos", bromea Luke. Layton interroga a los felinos con la mirada.',
+          'En el teatro, el tramoyista juraba que tres gatos del decorado cazaron a los ratones de utilería en tiempo récord, justo cuando se apagaron las luces '
+          'y la máscara cambió de manos. "Si los gatos son tan veloces, necesitaremos más ojos", bromeé. Holmes interrogó a los felinos con la mirada.',
       puzzle: byId('033'),
     ),
     BookPage(
@@ -48,9 +48,9 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'La máscara de oro',
       storyTitle: 'La mosca del tranvía',
       storyText:
-          'Dos carrozas del desfile avanzan una hacia la otra por la avenida mientras una paloma mensajera vuela sin parar de una a otra con notas del ladrón. '
-          'El cochero, mareado, pregunta cuánta distancia habrá volado la pobre ave cuando las carrozas se encuentren. '
-          'Layton sonríe: "Las palomas no entienden de idas y vueltas, solo de tiempo".',
+          'Dos carrozas del desfile avanzaban una hacia la otra por la avenida mientras una paloma mensajera volaba sin parar de una a otra con notas del ladrón. '
+          'El cochero, mareado, preguntó cuánta distancia habría volado la pobre ave cuando las carrozas se encuentren. '
+          'Holmes sonrió: "Las palomas no entienden de idas y vueltas, solo de tiempo".',
       puzzle: byId('034'),
     ),
     BookPage(
@@ -60,13 +60,13 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       storyTitle: 'El escaparate del cerillero (VISUAL)',
       storyText:
           'El cerillero del callejón vende figuras de cerillas y jura que el ladrón compró las suyas para dejar un mensaje en el escaparate: '
-          'dos triángulos unidos. "¿Cuántos triángulos ves, Luke? No cuentes las cerillas, cuenta las formas", advierte Layton empañando el cristal con el aliento.',
+          'dos triángulos unidos. "¿Cuántos triángulos ve, Watson? No cuente las cerillas, cuente las formas", advirtió Holmes empañando el cristal con el aliento.',
       puzzle: const PuzzleModel(
         id: 'C05',
         title: 'Puzle 5: Triángulos en el cristal',
         statement:
             'Observa la figura del escaparate: dos triángulos que comparten un lado. ¿Cuántos triángulos hay en total en la figura?',
-        Picarats: 20,
+        indicios: 20,
         correctAnswer: '2',
         hintText: 'Comparten un lado, pero siguen siendo dos triángulos.',
         type: PuzzleType.visualChoice,
@@ -81,8 +81,8 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'El pastor de la carroza',
       storyText:
-          'El conductor de la carroza real, un pastor jubilado, asegura que de sus diecisiete ovejas de cartón piedra del desfile "desaparecieron todas menos nueve" '
-          'la noche del robo. Luke abre los ojos como platos hasta que Layton le guiña un ojo: "Escucha bien las palabras, no las ovejas".',
+          'El conductor de la carroza real, un pastor jubilado, aseguró que de sus diecisiete ovejas de cartón piedra del desfile "desaparecieron todas menos nueve" '
+          'la noche del robo. Abrí los ojos como platos hasta que Holmes me guiñó un ojo: "Escuche bien las palabras, Watson, no las ovejas".',
       puzzle: byId('036'),
     ),
     BookPage(
@@ -91,8 +91,8 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'La pirámide de farolillos',
       storyText:
-          'En el baile de medianoche, una pirámide de farolillos ilumina el salón donde la Máscara de Oro debe reaparecer, según la nota del ladrón. '
-          'El mayordomo cuenta los farolillos de la base mientras los invitados enmascarados danzan. Layton cuenta niveles en silencio: '
+          'En el baile de medianoche, una pirámide de farolillos iluminaba el salón donde la Máscara de Oro debía reaparecer, según la nota del ladrón. '
+          'El mayordomo contaba los farolillos de la base mientras los invitados enmascarados danzaban. Holmes contaba niveles en silencio: '
           '"Toda pirámide esconde su número, como toda máscara esconde un rostro".',
       puzzle: byId('037'),
     ),
@@ -102,8 +102,8 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'Cuatro nueves de terciopelo',
       storyText:
-          'El ladrón deja un último reto bordado en terciopelo: componer el número cien con cuatro nueves. Los invitados se ríen, los músicos se detienen '
-          'y hasta el alcalde contiene la respiración. Luke murmura fracciones mientras Layton traza números en el aire con su bastón.',
+          'El ladrón dejó un último reto bordado en terciopelo: componer el número cien con cuatro nueves. Los invitados se rieron, los músicos se detuvieron '
+          'y hasta el alcalde contuvo la respiración. Murmuré fracciones mientras Holmes trazaba números en el aire con su bastón.',
       puzzle: byId('039'),
     ),
     BookPage(
@@ -112,9 +112,9 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'El retrato del dogo',
       storyText:
-          'En la galería, un niño señala un retrato antiguo y recita la adivinanza que el ladrón susurró al oído del guardia: '
+          'En la galería, un niño señaló un retrato antiguo y recitó la adivinanza que el ladrón susurró al oído del guardia: '
           'un hombre sin hermanos que habla del padre del retratado. El guardia, confuso, dejó pasar al enmascarado. '
-          '"La familia también es un puzle", reflexiona Layton ante el lienzo.',
+          '"La familia también es un enigma", reflexionó Holmes ante el lienzo.',
       puzzle: byId('040'),
     ),
     BookPage(
@@ -123,9 +123,9 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'Se cae la máscara',
       storyText:
-          'A medianoche, Layton pide que inviertan los focos del salón y el haz revela polvo de oro en los guantes blancos del… ¡maestro de ceremonias! '
-          'El número invertido de su camerino confirma la trampa. El ladrón se quita la máscara entre aplausos: quería demostrar que nadie vigilaba el patrimonio. '
-          'La Máscara de Oro vuelve al desfile y el carnaval estalla de alegría.',
+          'A medianoche, Holmes pidió que invirtieran los focos del salón y el haz reveló polvo de oro en los guantes blancos del… ¡maestro de ceremonias! '
+          'El número invertido de su camerino confirmó la trampa. El ladrón se quitó la máscara entre aplausos: quería demostrar que nadie vigilaba el patrimonio. '
+          'La Máscara de Oro volvió al desfile y el carnaval estalló de alegría.',
       puzzle: byId('044'),
     ),
   ];

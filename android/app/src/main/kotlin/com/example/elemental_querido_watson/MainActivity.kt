@@ -1,4 +1,4 @@
-package com.example.layton_app
+package com.example.elemental_querido_watson
 
 import io.flutter.embedding.android.FlutterActivity
 

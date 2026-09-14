@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "layton_app" "\0"
+            VALUE "FileDescription", "Elemental, querido Watson" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "layton_app" "\0"
+            VALUE "InternalName", "elemental_querido_watson" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "layton_app.exe" "\0"
-            VALUE "ProductName", "layton_app" "\0"
+            VALUE "OriginalFilename", "elemental_querido_watson.exe" "\0"
+            VALUE "ProductName", "Elemental, querido Watson" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

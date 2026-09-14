@@ -18,9 +18,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La luz apagada',
       storyTitle: 'Marealta sin faro',
       storyText:
-          'Tras el caso de Nebelheim, Layton y Luke viajan a Marealta, un pueblo pesquero donde el faro lleva una semana apagado. '
+          'Tras el caso de Nebelheim, Holmes y yo viajamos a Marealta, un pueblo pesquero donde el faro lleva una semana apagado. '
           'Los barcos dan rodeos temerosos y los pescadores murmuran sobre "la marea que se llevó al torrero Tomás". '
-          'En el muelle, una gaviota les deja caer una moneda falsa a los pies. Layton la recoge: "Nada es casual, Luke. Empecemos por pesar la verdad".',
+          'En el muelle, una gaviota nos dejó caer una moneda falsa a los pies. Holmes la recogió con dos dedos: "Nada es casual, Watson. Empecemos por pesar la verdad".',
       puzzle: byId('007'),
     ),
     BookPage(
@@ -29,9 +29,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La luz apagada',
       storyTitle: 'La cuerda del muelle',
       storyText:
-          'El cabo del puerto les muestra la cuerda del embarcadero, cortada en varios puntos durante la tormenta. '
-          '"Fue la noche en que Tomás desapareció", asegura. Luke cuenta los cortes con el dedo mientras el profesor observa las marcas: '
-          'los cortes son limpios, de navaja, no de temporal. "La tormenta no usa cuchillos, muchacho", sentencia Layton.',
+          'El cabo del puerto nos mostró la cuerda del embarcadero, cortada en varios puntos durante la tormenta. '
+          '"Fue la noche en que Tomás desapareció", aseguró. Conté los cortes con el dedo mientras Holmes observaba las marcas: '
+          'los cortes eran limpios, de navaja, no de temporal. "La tormenta no usa cuchillos, Watson", sentenció.',
       puzzle: byId('008'),
     ),
     BookPage(
@@ -40,9 +40,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La luz apagada',
       storyTitle: 'Cuatro gorros de lana',
       storyText:
-          'En la taberna "La Sirena", cuatro marineros con gorros de lana discuten sobre quién vio al torrero por última vez. '
-          'Dos gorros son blancos y dos negros, pero la taberna está a oscuras por el apagón. El tabernero propone un juego para refrescar memorias: '
-          '"El que deduzca su color, invita a la ronda". Layton sonríe: un enigma de sombreros nunca falla.',
+          'En la taberna "La Sirena", cuatro marineros con gorros de lana discutían sobre quién vio al torrero por última vez. '
+          'Dos gorros son blancos y dos negros, pero la taberna está a oscuras por el apagón. El tabernero propuso un juego para refrescar memorias: '
+          '"El que deduzca su color, invita a la ronda". Holmes sonrió: un enigma de sombreros nunca falla.',
       puzzle: byId('003'),
     ),
     BookPage(
@@ -51,9 +51,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La luz apagada',
       storyTitle: 'La vela del torrero',
       storyText:
-          'Suben al faro con una sola caja de cerillas. La escalera de caracol está helada y la lámpara principal, la vela de señales y el brasero '
-          'aguardan apagados. "Solo tenemos una cerilla intacta", advierte Luke temblando. Layton la protege del viento con el sombrero: '
-          '"Entonces habrá que elegir bien el primer fuego, como en todo misterio".',
+          'Subimos al faro con una sola caja de cerillas. La escalera de caracol estaba helada y la lámpara principal, la vela de señales y el brasero '
+          'aguardaban apagados. "Solo tenemos una cerilla intacta", advertí tiritando. Holmes la protegió del viento con su gorra de cazador: '
+          '"Entonces habrá que elegir bien el primer fuego, como en todo caso".',
       puzzle: byId('004'),
     ),
     BookPage(
@@ -62,15 +62,15 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La luz apagada',
       storyTitle: 'El mosaico de caracolas (VISUAL)',
       storyText:
-          'En la sala de la lámpara encuentran un mosaico de caracolas que Tomás colocaba cada noche: cuatro figuras casi idénticas, pero una rompe el patrón. '
-          '"El torrero marcaba así las noches sin incidentes", deduce Layton. "Encuentra la distinta y sabremos qué noche falló". '
-          'Las caracolas brillan bajo la linterna como pequeñas lunas.',
+          'En la sala de la lámpara encontramos un mosaico de caracolas que Tomás colocaba cada noche: cuatro figuras casi idénticas, pero una rompe el patrón. '
+          '"El torrero marcaba así las noches sin incidentes", dedujo Holmes. "Encuentre la distinta y sabremos qué noche falló". '
+          'Las caracolas brillaban bajo la linterna como pequeñas lunas.',
       puzzle: const PuzzleModel(
         id: 'F05',
         title: 'Puzle 5: La caracola distinta',
         statement:
             'Observa las 4 figuras del mosaico. Tres son iguales y una es diferente. ¿Cuál es la figura distinta? Escríbela.',
-        Picarats: 25,
+        indicios: 25,
         correctAnswer: '▲',
         hintText: 'Compara una a una: círculo, círculo… ¿y la tercera?',
         type: PuzzleType.visualChoice,
@@ -85,9 +85,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'El padre y el grumete',
       storyText:
-          'Un viejo lobo de mar confiesa entre sollozos: su hijo, grumete del último barco, discutió con Tomás por unas cajas "que pesaban demasiado para llevar pescado". '
-          'Layton anota las edades que el hombre menciona entre lágrimas y descubre que los números no cuadran. '
-          '"Las mentiras también envejecen mal, Luke. Hagamos cuentas".',
+          'Un viejo lobo de mar confesó entre sollozos: su hijo, grumete del último barco, discutió con Tomás por unas cajas "que pesaban demasiado para llevar pescado". '
+          'Holmes anotó las edades que el hombre mencionó entre lágrimas y descubrió que los números no cuadraban. '
+          '"Las mentiras también envejecen mal, Watson. Hagamos cuentas".',
       puzzle: byId('009'),
     ),
     BookPage(
@@ -96,9 +96,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'El gato del faro',
       storyText:
-          'El gato del faro, "Brújula", aparece maullando junto a un muro de tres metros que separa el faro del acantilado. '
-          'Cada día intenta saltarlo para volver con Tomás. Luke lo anima con un trozo de pescado: "¡Tú puedes, Brújula!". '
-          'Layton calcula en su libreta cuántos intentos necesitará el valiente felino.',
+          'El gato del faro, "Brújula", apareció maullando junto a un muro de tres metros que separa el faro del acantilado. '
+          'Cada día intenta saltarlo para volver con Tomás. Lo animé con un trozo de pescado: "¡Tú puedes, Brújula!". '
+          'Holmes calculó en su libreta cuántos intentos necesitará el valiente felino.',
       puzzle: byId('010'),
     ),
     BookPage(
@@ -109,7 +109,7 @@ Future<StoryBook> buildLighthouseBook(
       storyText:
           'Bajo el faro hay un sótano con tres interruptores y, arriba, la sala de la lámpara con una sola bombilla de repuesto. '
           'Los contrabandistas usaban el sótano de almacén y solo se puede subir una vez sin hacer ruido. '
-          '"Dos de estos interruptores son nuestro faro improvisado", murmura Layton girando la llave inglesa.',
+          '"Dos de estos interruptores son nuestro faro improvisado", murmuró Holmes girando la llave inglesa.',
       puzzle: byId('005'),
     ),
     BookPage(
@@ -118,8 +118,8 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'Doce meses de niebla',
       storyText:
-          'Atrapados, los contrabandistas confiesan: apagaban el faro las noches de luna nueva para desembarcar sin ser vistos, y Tomás los descubrió. '
-          'Lo encerraron en la cueva de las mareas. "¿Cuántas lunas nuevas hubo este año?", pregunta Luke consultando el calendario del torrero, '
+          'Atrapados, los contrabandistas confesaron: apagaban el faro las noches de luna nueva para desembarcar sin ser vistos, y Tomás los descubrió. '
+          'Lo encerraron en la cueva de las mareas. "¿Cuántas lunas nuevas hubo este año?", pregunté consultando el calendario del torrero, '
           'lleno de marcas circulares.',
       puzzle: byId('069'),
     ),
@@ -129,9 +129,9 @@ Future<StoryBook> buildLighthouseBook(
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'La luz vuelve a casa',
       storyText:
-          'Liberan a Tomás de la cueva justo cuando dos barcos —el de los pescadores y el de la guardia costera— navegan hacia el faro a toda máquina. '
-          'Layton enciende la lámpara de repuesto y su haz barre la niebla. "Calculad la distancia, deprisa", grita al torrero, '
-          'que ríe por primera vez en una semana mientras gira la lente hacia el mar.',
+          'Liberamos a Tomás de la cueva justo cuando dos barcos —el de los pescadores y el de la guardia costera— navegaban hacia el faro a toda máquina. '
+          'Holmes encendió la lámpara de repuesto y su haz barrió la niebla. "Calcule la distancia, deprisa", gritó al torrero, '
+          'que rio por primera vez en una semana mientras giraba la lente hacia el mar.',
       puzzle: byId('096'),
     ),
   ];
