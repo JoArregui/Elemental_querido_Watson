@@ -66,7 +66,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
         title: 'Puzle 5: Triángulos en el cristal',
         statement:
             'Observa la figura del escaparate: dos triángulos que comparten un lado. ¿Cuántos triángulos hay en total en la figura?',
-        indicios: 20,
+        experiencia: 20,
         correctAnswer: '2',
         hintText: 'Comparten un lado, pero siguen siendo dos triángulos.',
         type: PuzzleType.visualChoice,

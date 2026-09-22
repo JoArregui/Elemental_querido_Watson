@@ -21,7 +21,7 @@ class BookLoaded extends BookState {
   final List<BookPage> pages;
   final int currentIndex;
   final Set<String> solvedPuzzleIds;
-  final int totalIndicios;
+  final int totalexperiencia;
   final bool? lastAnswerCorrect;
   final int failedAttemptsOnPage;
 
@@ -30,7 +30,7 @@ class BookLoaded extends BookState {
     required this.pages,
     required this.currentIndex,
     required this.solvedPuzzleIds,
-    required this.totalIndicios,
+    required this.totalexperiencia,
     this.lastAnswerCorrect,
     this.failedAttemptsOnPage = 0,
   });
@@ -40,25 +40,59 @@ class BookLoaded extends BookState {
   int get solvedCount => solvedPuzzleIds.length;
   double get progress => pages.isEmpty ? 0 : solvedCount / pages.length;
 
-  /// Página desbloqueada si es la primera o la anterior está resuelta.
+  /// Navegación libre: todas las páginas están accesibles para lectura.
+  /// La recompensa (experiencia) solo se gana si se resuelve el acertijo,
+  /// pero nunca se bloquea el avance de la historia.
   bool isPageUnlocked(int index) {
-    if (index == 0) return true;
     if (index < 0 || index >= pages.length) return false;
-    return solvedPuzzleIds.contains(pages[index - 1].puzzle.id);
+    return true;
   }
 
-  bool get canGoNext =>
-      currentIndex < pages.length - 1 && isCurrentSolved;
+  /// Se puede avanzar siempre que no sea la última página.
+  /// Resolver da experiencia; saltar deja esos experiencia sin ganar.
+  bool get canGoNext => currentIndex < pages.length - 1;
 
-  bool get isBookCompleted =>
+  /// Solo hay recompensa si la página actual está resuelta.
+  bool get canGoNextWithReward => canGoNext && isCurrentSolved;
+
+  bool get canGoPrevious => currentIndex > 0;
+  bool get isLastPage => pages.isNotEmpty && currentIndex == pages.length - 1;
+  bool get isFirstPage => currentIndex == 0;
+
+  /// Puntuación máxima si todo se resolviera.
+  int get maxPossibleexperiencia =>
+      pages.fold(0, (sum, p) => sum + p.puzzle.experiencia);
+
+  int get missedexperiencia => maxPossibleexperiencia - totalexperiencia;
+
+  // A3: bloqueo tras 3 fallos
+  bool get isBlockedByAttempts => failedAttemptsOnPage >= 3;
+  bool get canAttempt => !isCurrentSolved && !isBlockedByAttempts;
+
+  /// Libro completamente resuelto al 100% (todos los experiencia conseguidos).
+  bool get isFullyCompleted =>
       pages.isNotEmpty && solvedPuzzleIds.length == pages.length;
+
+  // C2: finales ramificados por % XP
+  double get completionRate => maxPossibleexperiencia == 0 ? 0 : totalexperiencia / maxPossibleexperiencia;
+  String get endingTier {
+    if (isFullyCompleted) return 'perfect';
+    if (completionRate >= 0.7) return 'good';
+    if (completionRate >= 0.4) return 'half';
+    return 'low';
+  }
+
+  /// Compatibilidad: ahora distingue entre lectura completa y 100% aciertos.
+  /// Para el flujo de celebración final usamos isFullyCompleted, pero
+  /// cualquier lector puede terminar la historia con puntuación parcial.
+  bool get isBookCompleted => isFullyCompleted;
 
   BookLoaded copyWith({
     StoryBook? book,
     List<BookPage>? pages,
     int? currentIndex,
     Set<String>? solvedPuzzleIds,
-    int? totalIndicios,
+    int? totalexperiencia,
     bool? Function()? lastAnswerCorrect,
     int? failedAttemptsOnPage,
   }) {
@@ -67,7 +101,7 @@ class BookLoaded extends BookState {
       pages: pages ?? this.pages,
       currentIndex: currentIndex ?? this.currentIndex,
       solvedPuzzleIds: solvedPuzzleIds ?? this.solvedPuzzleIds,
-      totalIndicios: totalIndicios ?? this.totalIndicios,
+      totalexperiencia: totalexperiencia ?? this.totalexperiencia,
       lastAnswerCorrect:
           lastAnswerCorrect != null ? lastAnswerCorrect() : this.lastAnswerCorrect,
       failedAttemptsOnPage:
@@ -81,7 +115,7 @@ class BookLoaded extends BookState {
         pages,
         currentIndex,
         solvedPuzzleIds,
-        totalIndicios,
+        totalexperiencia,
         lastAnswerCorrect,
         failedAttemptsOnPage,
       ];

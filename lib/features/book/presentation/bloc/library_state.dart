@@ -19,8 +19,8 @@ class LibraryLoaded extends LibraryState {
   final List<StoryBook> books;
   final Map<String, int> solvedCounts;
   final Set<String> completedBookIds;
-  final Map<String, int> indiciosPerBook;
-  final int totalIndicios;
+  final Map<String, int> experienciaPerBook;
+  final int totalexperiencia;
   final String? lastBookId;
   final int lastPageIndex;
   final bool hasSave;
@@ -29,8 +29,8 @@ class LibraryLoaded extends LibraryState {
     required this.books,
     required this.solvedCounts,
     required this.completedBookIds,
-    required this.indiciosPerBook,
-    required this.totalIndicios,
+    required this.experienciaPerBook,
+    required this.totalexperiencia,
     required this.lastBookId,
     required this.lastPageIndex,
     required this.hasSave,
@@ -59,8 +59,8 @@ class LibraryLoaded extends LibraryState {
         books,
         solvedCounts,
         completedBookIds,
-        indiciosPerBook,
-        totalIndicios,
+        experienciaPerBook,
+        totalexperiencia,
         lastBookId,
         lastPageIndex,
         hasSave,

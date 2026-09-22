@@ -68,7 +68,7 @@ Future<StoryBook> buildObservatoryBook(
         title: 'Puzle 5: Meteoritos en equilibrio',
         statement:
             'Mira la balanza: en un lado hay 2 pesas de 5 kg y 2 pesas de 1 kg. ¿Cuántas pesas de 3 kg necesitas en el otro lado para equilibrarla?',
-        indicios: 25,
+        experiencia: 25,
         correctAnswer: '4',
         hintText: 'El otro lado pesa 2×5 + 2×1 = 12 kg.',
         type: PuzzleType.visualChoice,
@@ -122,7 +122,7 @@ Future<StoryBook> buildObservatoryBook(
         title: 'Puzle 9: El friso nocturno',
         statement:
             'Observa la secuencia: ★ ● ★ ● ★ … ¿Qué figura debe ir en sexto lugar para completar el patrón?',
-        indicios: 25,
+        experiencia: 25,
         correctAnswer: '●',
         hintText: 'El patrón alterna estrella y círculo: ★ ● ★ ●…',
         type: PuzzleType.visualChoice,
@@ -145,7 +145,7 @@ Future<StoryBook> buildObservatoryBook(
         title: 'Puzle 10: El firmamento completo',
         statement:
             'Observa la cuadrícula de 4×4 del suelo. ¿Cuántos cuadrados de todos los tamaños hay en total (1×1, 2×2, 3×3 y 4×4)?',
-        indicios: 50,
+        experiencia: 50,
         correctAnswer: '30',
         hintText: 'Suma 16 + 9 + 4 + 1.',
         type: PuzzleType.visualChoice,

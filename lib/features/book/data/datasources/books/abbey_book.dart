@@ -74,7 +74,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
         title: 'Puzle 6: La vidriera distinta',
         statement:
             'Observa las 4 figuras del rosetón. Tres son iguales y una es diferente. ¿Cuál es la figura distinta? Escríbela.',
-        indicios: 25,
+        experiencia: 25,
         correctAnswer: '★',
         hintText: 'Compara una a una: cuadrado, cuadrado… ¿y la tercera?',
         type: PuzzleType.visualChoice,
@@ -137,7 +137,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
         title: 'Puzle 11: La pirámide invertida',
         statement:
             'Observa la pirámide de 10 monedas (filas de 1, 2, 3 y 4). ¿Cuántas monedas debes mover como mínimo para que la pirámide apunte hacia abajo?',
-        indicios: 35,
+        experiencia: 35,
         correctAnswer: '3',
         hintText: 'Las tres monedas de las esquinas cambian de sitio.',
         type: PuzzleType.visualChoice,

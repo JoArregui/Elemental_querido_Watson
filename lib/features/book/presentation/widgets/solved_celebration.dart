@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/services/feedback_service.dart';
 
 /// Celebración a pantalla completa al resolver el acertijo de una página.
 /// Dura ~3,2 segundos (o hasta que se toca para continuar) y avisa con
@@ -7,7 +9,7 @@ import 'package:flutter/material.dart';
 class SolvedCelebration extends StatefulWidget {
   final int pageNumber;
   final int pageCount;
-  final int indicios;
+  final int experiencia;
   final VoidCallback onDone;
   final Duration duration;
 
@@ -15,7 +17,7 @@ class SolvedCelebration extends StatefulWidget {
     super.key,
     required this.pageNumber,
     required this.pageCount,
-    required this.indicios,
+    required this.experiencia,
     required this.onDone,
     this.duration = const Duration(milliseconds: 3200),
   });
@@ -38,6 +40,7 @@ class _SolvedCelebrationState extends State<SolvedCelebration>
   @override
   void initState() {
     super.initState();
+    FeedbackService().celebrate();
     _controller = AnimationController(
         vsync: this, duration: widget.duration)
       ..forward();
@@ -116,7 +119,9 @@ class _SolvedCelebrationState extends State<SolvedCelebration>
               Opacity(
                 opacity: _textFade.value,
                 child: Text(
-                  '¡Página ${widget.pageNumber} resuelta!',
+                  AppLocalizations.of(context).locale.languageCode == 'en'
+                      ? 'Page ${widget.pageNumber} solved!'
+                      : '¡Página ${widget.pageNumber} resuelta!',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.amber,
@@ -129,7 +134,9 @@ class _SolvedCelebrationState extends State<SolvedCelebration>
               Opacity(
                 opacity: _textFade.value,
                 child: Text(
-                  '${widget.pageNumber} de ${widget.pageCount} páginas',
+                  AppLocalizations.of(context).locale.languageCode == 'en'
+                      ? '${widget.pageNumber} of ${widget.pageCount} pages'
+                      : '${widget.pageNumber} de ${widget.pageCount} páginas',
                   style: const TextStyle(
                       color: Colors.white70, fontSize: 14),
                 ),
@@ -154,7 +161,7 @@ class _SolvedCelebrationState extends State<SolvedCelebration>
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '+${widget.indicios} indicios',
+                    '+${widget.experiencia} ${AppLocalizations.of(context).tr('xp')}',
                     style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -163,9 +170,9 @@ class _SolvedCelebrationState extends State<SolvedCelebration>
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Toca para continuar',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).locale.languageCode == 'en' ? 'Tap to continue' : 'Toca para continuar',
+                style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,
                     fontStyle: FontStyle.italic),
