@@ -5,12 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// o empezar una nueva desde cero.
 class BookProgressRepository {
   static const _solvedPrefix = 'progress_solved_';
-  static const _indiciosPrefix = 'progress_picarats_';
+  static const _experienciaPrefix = 'progress_picarats_';
   static const _lastBookKey = 'progress_last_book';
   static const _lastPageKey = 'progress_last_page';
 
   final Map<String, Set<String>> _solvedByBook = {};
-  final Map<String, int> _indiciosByBook = {};
+  final Map<String, int> _experienciaByBook = {};
   String? _lastBookId;
   int _lastPageIndex = 0;
   bool _ready = false;
@@ -27,9 +27,9 @@ class BookProgressRepository {
         final bookId = key.substring(_solvedPrefix.length);
         _solvedByBook[bookId] =
             Set<String>.from(prefs.getStringList(key) ?? const []);
-      } else if (key.startsWith(_indiciosPrefix)) {
-        final bookId = key.substring(_indiciosPrefix.length);
-        _indiciosByBook[bookId] = prefs.getInt(key) ?? 0;
+      } else if (key.startsWith(_experienciaPrefix)) {
+        final bookId = key.substring(_experienciaPrefix.length);
+        _experienciaByBook[bookId] = prefs.getInt(key) ?? 0;
       }
     }
     _ready = true;
@@ -41,10 +41,10 @@ class BookProgressRepository {
     return Set<String>.from(_solvedByBook[bookId] ?? const {});
   }
 
-  int indiciosFor(String bookId) => _indiciosByBook[bookId] ?? 0;
+  int experienciaFor(String bookId) => _experienciaByBook[bookId] ?? 0;
 
-  int totalIndicios() =>
-      _indiciosByBook.values.fold(0, (a, b) => a + b);
+  int totalexperiencia() =>
+      _experienciaByBook.values.fold(0, (a, b) => a + b);
 
   bool isBookCompleted(String bookId, int pageCount) {
     return (_solvedByBook[bookId]?.length ?? 0) >= pageCount &&
@@ -66,18 +66,18 @@ class BookProgressRepository {
   Future<bool> markSolved({
     required String bookId,
     required String puzzleId,
-    required int indicios,
+    required int experiencia,
   }) async {
     final solved = _solvedByBook.putIfAbsent(bookId, () => <String>{});
     if (solved.contains(puzzleId)) return false;
     solved.add(puzzleId);
-    _indiciosByBook[bookId] = indiciosFor(bookId) + indicios;
+    _experienciaByBook[bookId] = experienciaFor(bookId) + experiencia;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
         '$_solvedPrefix$bookId', solved.toList());
     await prefs.setInt(
-        '$_indiciosPrefix$bookId', _indiciosByBook[bookId]!);
+        '$_experienciaPrefix$bookId', _experienciaByBook[bookId]!);
     return true;
   }
 
@@ -95,22 +95,22 @@ class BookProgressRepository {
 
   Future<void> resetBook(String bookId) async {
     _solvedByBook.remove(bookId);
-    _indiciosByBook.remove(bookId);
+    _experienciaByBook.remove(bookId);
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('$_solvedPrefix$bookId');
-    await prefs.remove('$_indiciosPrefix$bookId');
+    await prefs.remove('$_experienciaPrefix$bookId');
   }
 
   /// Nueva partida: borra todo el progreso y la última posición.
   Future<void> resetAll() async {
     _solvedByBook.clear();
-    _indiciosByBook.clear();
+    _experienciaByBook.clear();
     _lastBookId = null;
     _lastPageIndex = 0;
     final prefs = await SharedPreferences.getInstance();
     for (final key in prefs.getKeys().toList()) {
       if (key.startsWith(_solvedPrefix) ||
-          key.startsWith(_indiciosPrefix) ||
+          key.startsWith(_experienciaPrefix) ||
           key == _lastBookKey ||
           key == _lastPageKey) {
         await prefs.remove(key);

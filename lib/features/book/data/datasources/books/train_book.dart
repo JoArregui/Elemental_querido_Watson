@@ -96,7 +96,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
         title: 'Puzle 8: El rubí del banquero',
         statement:
             'Cofre rojo: "El rubí está en el azul". Cofre azul: "El rubí está aquí". Cofre verde: "El rubí no está aquí". Solo UNA afirmación es verdad. ¿Dónde está el rubí? Elige el color.',
-        indicios: 40,
+        experiencia: 40,
         correctAnswer: 'rojo',
         hintText: 'Supón que la única verdad la dice el cofre rojo y comprueba el resto.',
         type: PuzzleType.visualChoice,
@@ -158,7 +158,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
         title: 'Puzle 13: El mosaico pequeño',
         statement:
             'Observa la cuadrícula de 2×2 del suelo. ¿Cuántos cuadrados de todos los tamaños hay en total (1×1 y 2×2)?',
-        indicios: 25,
+        experiencia: 25,
         correctAnswer: '5',
         hintText: 'Suma 4 + 1.',
         type: PuzzleType.visualChoice,

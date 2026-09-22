@@ -29,10 +29,10 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
       final books = await dataSource.getLibrary();
       final solvedCounts = <String, int>{};
       final completed = <String>{};
-      final indicios = <String, int>{};
+      final experiencia = <String, int>{};
       for (final b in books) {
         solvedCounts[b.id] = progress.solvedCount(b.id);
-        indicios[b.id] = progress.indiciosFor(b.id);
+        experiencia[b.id] = progress.experienciaFor(b.id);
         if (progress.isBookCompleted(b.id, b.pageCount)) {
           completed.add(b.id);
         }
@@ -41,8 +41,8 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
         books: books,
         solvedCounts: solvedCounts,
         completedBookIds: completed,
-        indiciosPerBook: indicios,
-        totalIndicios: progress.totalIndicios(),
+        experienciaPerBook: experiencia,
+        totalexperiencia: progress.totalexperiencia(),
         lastBookId: progress.lastBookId,
         lastPageIndex: progress.lastPageIndex,
         hasSave: progress.hasSave,

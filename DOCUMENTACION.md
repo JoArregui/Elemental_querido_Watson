@@ -15,9 +15,9 @@ con un acertijo. Resolverlo desbloquea la página siguiente.
 |---|---|
 | Biblioteca | Home con 6 libros-etapa, cada uno con portada, progreso y bloqueo por etapas |
 | Lectura | `PageView` con efecto libro, historia + 1 acertijo por página |
-| Celebración | Animación de ~3,2 s al resolver cada página (✔ elástico, estrellas, indicios; se salta tocando) |
+| Celebración | Animación de ~3,2 s al resolver cada página (✔ elástico, estrellas, experiencia; se salta tocando) |
 | Acertijos | 90 distintos (texto, opción múltiple y visuales dibujados con widgets) |
-| Guardado | Partida persistente: progreso, indicios y última posición |
+| Guardado | Partida persistente: progreso, experiencia y última posición |
 | Continuar | Botón para retomar donde se dejó; *Nueva partida* con confirmación |
 | Audiolibro | Lectura en voz alta en español (icono 🔊) + tamaño de letra ajustable |
 | Splash | Imagen de presentación durante 3,5 s con fundido a la biblioteca |
@@ -53,7 +53,7 @@ acertijo de la anterior.
   `coin_triangle`, `balance`, `grid_squares` (2×2, 3×3 y 4×4) y `dials`.
   Varios aceptan `visualPayload` para variar el contenido
   (p. ej. `★,●,★,●,★,?` o `2×5kg + 2×1kg|? × 3kg`).
-- La moneda del juego son los **indicios** ⭐ (cada acertijo indica su valor).
+- La moneda del juego son los **experiencia** ⭐ (cada acertijo indica su valor).
 - Los libros 2–6 reutilizan acertijos clásicos por `id` desde
   `puzzle_local_data_source.dart` (100 disponibles); ningún `id` se repite
   entre libros (verificado por test).
@@ -89,12 +89,12 @@ lib/
 ### Flujos principales
 
 - **Biblioteca** (`LibraryBloc`): carga los libros, calcula progreso por libro
-  (resueltos, completados, indicios) y expone `resumeBook` para continuar.
+  (resueltos, completados, experiencia) y expone `resumeBook` para continuar.
 - **Lector** (`BookBloc` por libro): navegación entre páginas, envío de
   respuestas y guardado automático de la última posición.
 - **Progreso** (`BookProgressRepository` + `shared_preferences`):
   - `progress_solved_<bookId>` → lista de acertijos resueltos
-  - `progress_picarats_<bookId>` → indicios por libro (clave histórica)
+  - `progress_picarats_<bookId>` → experiencia por libro (clave histórica)
   - `progress_last_book` / `progress_last_page` → dónde continuar
 
 ---

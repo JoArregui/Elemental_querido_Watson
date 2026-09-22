@@ -16,20 +16,18 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       emit(const BookLoading());
       try {
         final book = await dataSource.getBook(event.bookId);
-        var start = event.initialPage.clamp(0, book.pages.length - 1);
+        final start = event.initialPage.clamp(0, book.pages.length - 1);
         final solved = progress.solvedFor(book.id);
-        // Nunca arranques en una página bloqueada.
-        if (start > 0 &&
-            !solved.contains(book.pages[start - 1].puzzle.id)) {
-          start = 0;
-        }
+        // Navegación libre: se respeta la última posición guardada,
+        // aunque la página anterior no esté resuelta. Avanzar sin
+        // resolver solo deja de sumar experiencia.
         await progress.saveLastPosition(bookId: book.id, pageIndex: start);
         emit(BookLoaded(
           book: book,
           pages: book.pages,
           currentIndex: start,
           solvedPuzzleIds: solved,
-          totalIndicios: progress.indiciosFor(book.id),
+          totalexperiencia: progress.experienciaFor(book.id),
         ));
       } catch (_) {
         emit(const BookError('No se pudo abrir el libro. Inténtalo de nuevo.'));
@@ -40,7 +38,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       final s = state;
       if (s is BookLoaded) {
         if (event.pageIndex < 0 || event.pageIndex >= s.pages.length) return;
-        if (!s.isPageUnlocked(event.pageIndex)) return;
+        // Navegación libre: cualquier página es accesible.
         await progress.saveLastPosition(
             bookId: s.book.id, pageIndex: event.pageIndex);
         emit(s.copyWith(
@@ -82,18 +80,22 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     on<SubmitPageAnswerEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
+        if (s.isBlockedByAttempts) return;
         final puzzle = s.currentPage.puzzle;
         final isCorrect = puzzle.checkAnswer(event.answer);
         if (isCorrect) {
+          // A1: penalización -5 XP por pista usada (mín 1 XP)
+          final penalty = (event.hintsUsed * 5).clamp(0, puzzle.experiencia - 1);
+          final awarded = (puzzle.experiencia - penalty).clamp(1, 999);
           await progress.markSolved(
             bookId: s.book.id,
             puzzleId: puzzle.id,
-            indicios: puzzle.indicios,
+            experiencia: awarded,
           );
           final updated = progress.solvedFor(s.book.id);
           emit(s.copyWith(
             solvedPuzzleIds: updated,
-            totalIndicios: progress.indiciosFor(s.book.id),
+            totalexperiencia: progress.experienciaFor(s.book.id),
             lastAnswerCorrect: () => true,
           ));
         } else {
@@ -120,7 +122,7 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         emit(s.copyWith(
           currentIndex: 0,
           solvedPuzzleIds: <String>{},
-          totalIndicios: 0,
+          totalexperiencia: 0,
           lastAnswerCorrect: () => null,
           failedAttemptsOnPage: 0,
         ));

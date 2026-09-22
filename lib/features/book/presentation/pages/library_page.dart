@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart' as di;
+import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/services/locale_service.dart';
+import '../../../../core/widgets/responsive.dart';
 import '../../domain/entities/story_book.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/library_bloc.dart';
 import '../bloc/library_event.dart';
 import '../bloc/library_state.dart';
+import '../widgets/daily_banner.dart';
 import 'book_reader_page.dart';
 
 /// Home: biblioteca con un libro por etapa.
@@ -35,12 +39,12 @@ class LibraryPage extends StatelessWidget {
 
   void _openBook(BuildContext context, LibraryLoaded state, int index,
       {int initialPage = 0}) {
+    final l10n = AppLocalizations.of(context);
     final book = state.books[index];
     if (!state.isBookUnlocked(index)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              'La etapa ${book.stage} se desbloquea al completar "${state.books[index - 1].title}".'),
+          content: Text(l10n.tr('lockedStage', {'stage': '${book.stage}', 'title': state.books[index - 1].title})),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -64,18 +68,17 @@ class LibraryPage extends StatelessWidget {
   }
 
   Future<void> _confirmNewGame(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: const Color(0xFFFFF3CD),
-        title: const Text('¿Empezar una nueva partida?'),
-        content: const Text(
-          'Se borrará todo el progreso guardado: acertijos resueltos, indicios y la última posición. Esta acción no se puede deshacer.',
-        ),
+        title: Text(l10n.confirmNewGameTitle),
+        content: Text(l10n.confirmNewGameBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -83,7 +86,7 @@ class LibraryPage extends StatelessWidget {
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: const Text('Borrar y empezar'),
+            child: Text(l10n.deleteAndStart),
           ),
         ],
       ),
@@ -91,9 +94,9 @@ class LibraryPage extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       context.read<LibraryBloc>().add(const ResetAllProgressEvent());
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Partida nueva: la biblioteca vuelve a empezar.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(l10n.newGameSnick),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -101,38 +104,74 @@ class LibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isPhone = Responsive.isPhone(context);
     return Scaffold(
       backgroundColor: const Color(0xFF2C1A0E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1009),
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Elemental, querido Watson',
-                style: TextStyle(color: Colors.amber, fontSize: 18)),
-            Text('Biblioteca de casos · cada libro es una etapa',
-                style: TextStyle(color: Colors.white54, fontSize: 11),
+            Text(l10n.appTitle,
+                style: TextStyle(color: Colors.amber, fontSize: isPhone ? 16 : 18)),
+            Text(l10n.appSubtitle,
+                style: TextStyle(color: Colors.white54, fontSize: isPhone ? 10 : 11),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),
           ],
         ),
         actions: [
+          // Selector idioma ES/EN
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language, color: Colors.amber),
+            tooltip: l10n.selectLanguage,
+            color: const Color(0xFFFFF3CD),
+            onSelected: (value) async {
+              final svc = di.sl<LocaleService>();
+              if (value == 'es') await svc.setLocale(const Locale('es'));
+              if (value == 'en') await svc.setLocale(const Locale('en'));
+              if (context.mounted) context.read<LibraryBloc>().add(const LoadLibraryEvent());
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'es',
+                child: Row(
+                  children: [
+                    Text(di.sl<LocaleService>().value.languageCode == 'es' ? '●' : '○', style: const TextStyle(color: Colors.brown)),
+                    const SizedBox(width: 8),
+                    Text(l10n.spanish),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'en',
+                child: Row(
+                  children: [
+                    Text(di.sl<LocaleService>().value.languageCode == 'en' ? '●' : '○', style: const TextStyle(color: Colors.brown)),
+                    const SizedBox(width: 8),
+                    Text(l10n.english),
+                  ],
+                ),
+              ),
+            ],
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.amber),
-            tooltip: 'Opciones de partida',
+            tooltip: l10n.tr('language') == 'Idioma' ? 'Opciones de partida' : 'Game options',
             color: const Color(0xFFFFF3CD),
             onSelected: (value) {
               if (value == 'new_game') _confirmNewGame(context);
             },
-            itemBuilder: (_) => const [
+            itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'new_game',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_forever, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Nueva partida'),
+                    const Icon(Icons.delete_forever, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text(l10n.newGame),
                   ],
                 ),
               ),
@@ -141,20 +180,24 @@ class LibraryPage extends StatelessWidget {
           BlocBuilder<LibraryBloc, LibraryState>(
             builder: (context, state) {
               final total =
-                  state is LibraryLoaded ? state.totalIndicios : 0;
+                  state is LibraryLoaded ? state.totalexperiencia : 0;
+              String rank = l10n.tr('rankApprentice');
+              if (total >= 1500) rank = l10n.tr('rankHolmes');
+              else if (total >= 800) rank = l10n.tr('rankWatson');
+              else if (total >= 300) rank = l10n.tr('rankInvestigator');
               return Container(
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 6),
+                margin: const EdgeInsets.only(right: 8),
+                padding: EdgeInsets.symmetric(
+                    horizontal: isPhone ? 8 : 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.amber,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  '⭐ $total',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.black),
+                  '⭐ $total · $rank',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.black, fontSize: isPhone ? 11 : 12),
                 ),
               );
             },
@@ -189,22 +232,46 @@ class LibraryPage extends StatelessWidget {
 
           return Column(
             children: [
+              const DailyBanner(),
               if (state.hasSave && state.resumeBook != null)
                 _continueCard(context, state),
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.books.length,
-                  itemBuilder: (context, index) {
-                    final book = state.books[index];
-                    final unlocked = state.isBookUnlocked(index);
-                    final solved = state.solvedFor(book.id);
-                    final completed =
-                        state.completedBookIds.contains(book.id);
-                    return _bookCard(context, state, index, book,
-                        unlocked, solved, completed);
-                  },
-                ),
+                child: LayoutBuilder(builder: (ctx, cons) {
+                  final cross = Responsive.libraryCrossAxisCount(ctx);
+                  final pad = Responsive.pagePadding(ctx);
+                  if (cross == 1) {
+                    return ListView.builder(
+                      padding: EdgeInsets.fromLTRB(pad.left, pad.top, pad.right, pad.bottom),
+                      itemCount: state.books.length,
+                      itemBuilder: (context, index) {
+                        final book = state.books[index];
+                        final unlocked = state.isBookUnlocked(index);
+                        final solved = state.solvedFor(book.id);
+                        final completed = state.completedBookIds.contains(book.id);
+                        return _bookCard(context, state, index, book, unlocked, solved, completed);
+                      },
+                    );
+                  }
+                  return ResponsiveCenter(
+                    child: GridView.builder(
+                      padding: EdgeInsets.fromLTRB(pad.left, pad.top, pad.right, pad.bottom),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: cross,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: isPhone ? 1.6 : 1.45,
+                      ),
+                      itemCount: state.books.length,
+                      itemBuilder: (context, index) {
+                        final book = state.books[index];
+                        final unlocked = state.isBookUnlocked(index);
+                        final solved = state.solvedFor(book.id);
+                        final completed = state.completedBookIds.contains(book.id);
+                        return _bookCard(context, state, index, book, unlocked, solved, completed);
+                      },
+                    ),
+                  );
+                }),
               ),
             ],
           );
@@ -215,35 +282,39 @@ class LibraryPage extends StatelessWidget {
 
   /// Retoma la partida guardada donde se dejó.
   Widget _continueCard(BuildContext context, LibraryLoaded state) {
+    final l10n = AppLocalizations.of(context);
     final book = state.resumeBook!;
     final page = (state.lastPageIndex + 1).clamp(1, book.pageCount);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.amber,
-          foregroundColor: Colors.black,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        icon: const Icon(Icons.play_circle_fill, size: 28),
-        label: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Continuar partida',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-            Text(
-              '${book.title} · Pág. $page/${book.pageCount}',
-              style: const TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.bold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+    return ResponsiveCenter(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.amber,
+            foregroundColor: Colors.black,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          icon: const Icon(Icons.play_circle_fill, size: 28),
+          label: Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(l10n.continueGame,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                Text(
+                  '${book.title} · ${l10n.tr('pageOf', {'current': '$page', 'total': '${book.pageCount}'})}',
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
         onPressed: () {
           final index =
               state.books.indexWhere((b) => b.id == book.id);
@@ -251,6 +322,7 @@ class LibraryPage extends StatelessWidget {
           _openBook(context, state, index,
               initialPage: state.lastPageIndex);
         },
+      ),
       ),
     );
   }
@@ -309,7 +381,7 @@ class LibraryPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        'ETAPA ${book.stage}',
+                        '${AppLocalizations.of(context).tr('stage')} ${book.stage}',
                         style: const TextStyle(
                             color: Colors.amber,
                             fontSize: 10,
@@ -321,7 +393,7 @@ class LibraryPage extends StatelessWidget {
                         size: 44, color: Colors.amber.shade200),
                     const SizedBox(height: 10),
                     Text(
-                      '${book.pageCount} págs.',
+                      '${book.pageCount} ${AppLocalizations.of(context).tr('pages')}',
                       style: const TextStyle(
                           color: Colors.white70, fontSize: 11),
                     ),
@@ -354,13 +426,35 @@ class LibraryPage extends StatelessWidget {
                       Text(
                         book.description,
                         style: const TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 11.5,
                             color: Colors.black87,
-                            height: 1.4),
-                        maxLines: 3,
+                            height: 1.3),
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
+                      // B piloto: estrellas 1-3 por XP real
+                      Builder(builder: (context) {
+                        final xp = state.experienciaPerBook[book.id] ?? 0;
+                        final maxXp = book.pageCount * 35;
+                        final xpRate = maxXp == 0 ? progress : (xp / maxXp).clamp(0.0, 1.0);
+                        int stars = 0;
+                        if (progress >= 1.0) stars = 3;
+                        else if (xpRate >= 0.7 || progress >= 0.7) stars = 2;
+                        else if (progress > 0) stars = 1;
+                        return Row(
+                          children: [
+                            ...List.generate(3, (i) => Icon(
+                                  i < stars ? Icons.star : Icons.star_border,
+                                  size: 13,
+                                  color: i < stars ? Colors.amber.shade700 : Colors.brown.shade300,
+                                )),
+                            const SizedBox(width: 4),
+                            Flexible(child: Text('$xp XP', style: TextStyle(fontSize: 9, color: Colors.brown.shade600, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                          ],
+                        );
+                      }),
+                      const SizedBox(height: 4),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
                         child: LinearProgressIndicator(
@@ -380,8 +474,8 @@ class LibraryPage extends StatelessWidget {
                           Expanded(
                             child: Text(
                               completed
-                                  ? '✔ Completado · $solved/${book.pageCount}'
-                                  : '$solved/${book.pageCount} acertijos',
+                                  ? '✔ ${AppLocalizations.of(context).tr('completed')} · $solved/${book.pageCount}'
+                                  : '$solved/${book.pageCount} ${AppLocalizations.of(context).tr('solved')}',
                               style: TextStyle(
                                   fontSize: 11.5,
                                   color: completed

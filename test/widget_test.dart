@@ -86,7 +86,7 @@ void main() {
     expect(repo.hasSave, isFalse);
 
     final firstSave = await repo.markSolved(
-        bookId: 'nebelheim', puzzleId: 'B01', indicios: 20);
+        bookId: 'nebelheim', puzzleId: 'B01', experiencia: 20);
     expect(firstSave, isTrue);
     await repo.saveLastPosition(bookId: 'nebelheim', pageIndex: 4);
 
@@ -95,7 +95,7 @@ void main() {
     await resumed.init();
     expect(resumed.hasSave, isTrue);
     expect(resumed.solvedFor('nebelheim'), contains('B01'));
-    expect(resumed.indiciosFor('nebelheim'), 20);
+    expect(resumed.experienciaFor('nebelheim'), 20);
     expect(resumed.lastBookId, 'nebelheim');
     expect(resumed.lastPageIndex, 4);
 

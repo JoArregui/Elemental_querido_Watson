@@ -70,7 +70,7 @@ Future<StoryBook> buildLighthouseBook(
         title: 'Puzle 5: La caracola distinta',
         statement:
             'Observa las 4 figuras del mosaico. Tres son iguales y una es diferente. ¿Cuál es la figura distinta? Escríbela.',
-        indicios: 25,
+        experiencia: 25,
         correctAnswer: '▲',
         hintText: 'Compara una a una: círculo, círculo… ¿y la tercera?',
         type: PuzzleType.visualChoice,
