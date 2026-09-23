@@ -231,7 +231,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   static const List<BookPage> _pages = [
     // ── CAPÍTULO 1: La carta del relojero (1-6) ──
     BookPage(
-      pageNumber: 1,
+      pageNumber: 1, collectibleId: 'nebelheim-1',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La carta del relojero',
       storyTitle: 'Un telegrama en Baker Street',
@@ -251,7 +251,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 2,
+      pageNumber: 2, collectibleId: 'nebelheim-2',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La carta del relojero',
       storyTitle: 'El tren de las 7:04',
@@ -271,7 +271,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 3,
+      pageNumber: 3, collectibleId: 'nebelheim-3',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La carta del relojero',
       storyTitle: 'Niebla sobre Nebelheim',
@@ -292,7 +292,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 4,
+      pageNumber: 4, collectibleId: 'nebelheim-4',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La carta del relojero',
       storyTitle: 'La posada del Engranaje',
@@ -313,7 +313,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 5,
+      pageNumber: 5, collectibleId: 'nebelheim-5',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La carta del relojero',
       storyTitle: 'El friso de la puerta (VISUAL)',
@@ -336,7 +336,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 6,
+      pageNumber: 6, collectibleId: 'nebelheim-6',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La carta del relojero',
       storyTitle: 'El sótano del relojero',
@@ -358,7 +358,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
     ),
     // ── CAPÍTULO 2: La plaza detenida (7-12) ──
     BookPage(
-      pageNumber: 7,
+      pageNumber: 7, collectibleId: 'nebelheim-7',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La plaza detenida',
       storyTitle: 'Las diez y diez',
@@ -377,7 +377,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 8,
+      pageNumber: 8, collectibleId: 'nebelheim-8',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La plaza detenida',
       storyTitle: 'El vendedor de globos',
@@ -395,7 +395,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 9,
+      pageNumber: 9, collectibleId: 'nebelheim-9',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La plaza detenida',
       storyTitle: 'Ocho callejones',
@@ -414,7 +414,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 10,
+      pageNumber: 10, collectibleId: 'nebelheim-10',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La plaza detenida',
       storyTitle: 'Los tres cofres (VISUAL)',
@@ -437,7 +437,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 11,
+      pageNumber: 11, collectibleId: 'nebelheim-11',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La plaza detenida',
       storyTitle: 'El reloj de bolsillo',
@@ -458,7 +458,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 12,
+      pageNumber: 12, collectibleId: 'nebelheim-12',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La plaza detenida',
       storyTitle: 'Medianoche en la torre',
@@ -478,7 +478,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
     ),
     // ── CAPÍTULO 3: La biblioteca subterránea (13-18) ──
     BookPage(
-      pageNumber: 13,
+      pageNumber: 13, collectibleId: 'nebelheim-13',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La biblioteca subterránea',
       storyTitle: 'La losa que cede',
@@ -499,7 +499,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 14,
+      pageNumber: 14, collectibleId: 'nebelheim-14',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La biblioteca subterránea',
       storyTitle: 'El libro en blanco',
@@ -518,7 +518,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 15,
+      pageNumber: 15, collectibleId: 'nebelheim-15',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La biblioteca subterránea',
       storyTitle: 'El acertijo de las cerillas (VISUAL)',
@@ -541,7 +541,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 16,
+      pageNumber: 16, collectibleId: 'nebelheim-16',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La biblioteca subterránea',
       storyTitle: 'La guardiana',
@@ -559,7 +559,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 17,
+      pageNumber: 17, collectibleId: 'nebelheim-17',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La biblioteca subterránea',
       storyTitle: 'El pasadizo del agua',
@@ -580,7 +580,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 18,
+      pageNumber: 18, collectibleId: 'nebelheim-18',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La biblioteca subterránea',
       storyTitle: 'El archivo Elena',
@@ -601,7 +601,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
     ),
     // ── CAPÍTULO 4: El taller del relojero (19-24) ──
     BookPage(
-      pageNumber: 19,
+      pageNumber: 19, collectibleId: 'nebelheim-19',
       chapterLabel: 'Capítulo 4',
       chapterTitle: 'El taller del relojero',
       storyTitle: 'Engranajes y sombras',
@@ -622,7 +622,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 20,
+      pageNumber: 20, collectibleId: 'nebelheim-20',
       chapterLabel: 'Capítulo 4',
       chapterTitle: 'El taller del relojero',
       storyTitle: 'La balanza del maestro (VISUAL)',
@@ -644,7 +644,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 21,
+      pageNumber: 21, collectibleId: 'nebelheim-21',
       chapterLabel: 'Capítulo 4',
       chapterTitle: 'El taller del relojero',
       storyTitle: 'La confesión de Crow',
@@ -663,7 +663,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 22,
+      pageNumber: 22, collectibleId: 'nebelheim-22',
       chapterLabel: 'Capítulo 4',
       chapterTitle: 'El taller del relojero',
       storyTitle: 'El diario de Anselm',
@@ -682,7 +682,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 23,
+      pageNumber: 23, collectibleId: 'nebelheim-23',
       chapterLabel: 'Capítulo 4',
       chapterTitle: 'El taller del relojero',
       storyTitle: 'El cilindro vacío',
@@ -702,7 +702,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 24,
+      pageNumber: 24, collectibleId: 'nebelheim-24',
       chapterLabel: 'Capítulo 4',
       chapterTitle: 'El taller del relojero',
       storyTitle: 'Las nueve menos cuarto',
@@ -724,7 +724,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
     ),
     // ── CAPÍTULO 5: La medianoche (25-30) ──
     BookPage(
-      pageNumber: 25,
+      pageNumber: 25, collectibleId: 'nebelheim-25',
       chapterLabel: 'Capítulo 5',
       chapterTitle: 'La medianoche',
       storyTitle: 'El mosaico del campanario (VISUAL)',
@@ -747,7 +747,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 26,
+      pageNumber: 26, collectibleId: 'nebelheim-26',
       chapterLabel: 'Capítulo 5',
       chapterTitle: 'La medianoche',
       storyTitle: 'La nana de Elena',
@@ -768,7 +768,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 27,
+      pageNumber: 27, collectibleId: 'nebelheim-27',
       chapterLabel: 'Capítulo 5',
       chapterTitle: 'La medianoche',
       storyTitle: 'El corazón detenido',
@@ -789,7 +789,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 28,
+      pageNumber: 28, collectibleId: 'nebelheim-28',
       chapterLabel: 'Capítulo 5',
       chapterTitle: 'La medianoche',
       storyTitle: 'La respuesta de Watson',
@@ -808,7 +808,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 29,
+      pageNumber: 29, collectibleId: 'nebelheim-29',
       chapterLabel: 'Capítulo 5',
       chapterTitle: 'La medianoche',
       storyTitle: 'Las doce campanadas',
@@ -829,7 +829,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       ),
     ),
     BookPage(
-      pageNumber: 30,
+      pageNumber: 30, collectibleId: 'nebelheim-30',
       chapterLabel: 'Capítulo 5',
       chapterTitle: 'La medianoche',
       storyTitle: 'El último secreto (VISUAL FINAL)',

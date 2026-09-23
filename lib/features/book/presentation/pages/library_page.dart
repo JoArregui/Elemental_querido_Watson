@@ -4,7 +4,12 @@ import '../../../../injection_container.dart' as di;
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/services/locale_service.dart';
 import '../../../../core/widgets/responsive.dart';
+import '../../../../core/services/accessibility_service.dart';
+import '../../../../core/services/sync_service.dart';
+import '../../data/repositories/book_progress_repository.dart';
+import '../../data/repositories/daily_puzzle_repository.dart';
 import '../../domain/entities/story_book.dart';
+import 'map_page.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/library_bloc.dart';
@@ -102,6 +107,112 @@ class LibraryPage extends StatelessWidget {
     }
   }
 
+  void _showGallery(BuildContext context) {
+    final repo = di.sl<BookProgressRepository>();
+    final collected = repo.collectibles;
+    final isHolmes = repo.isHolmesRank;
+    final allSecrets = repo.secrets;
+    final allSolved = repo.allSolvedIds;
+    // 18 secretos = 101-112 ramificados + 113-118 deducciones
+    final secretIds = List.generate(18, (i) => '${101 + i}');
+    final secretsSolved = secretIds.where((id) => allSecrets.contains(id) || allSolved.contains(id)).length;
+    // 90 coleccionables = 30+10+10+10+15+15
+    final allCollectibles = <String>[
+      for (int i = 1; i <= 30; i++) 'nebelheim-$i',
+      for (int i = 1; i <= 10; i++) 'lighthouse-$i',
+      for (int i = 1; i <= 10; i++) 'carnival-$i',
+      for (int i = 1; i <= 10; i++) 'observatory-$i',
+      for (int i = 1; i <= 15; i++) 'train-$i',
+      for (int i = 1; i <= 15; i++) 'abbey-$i',
+    ];
+    final rewards = repo.rewardsUnlocked; // 6 libros
+    final rewardData = [
+      {'id':'nebelheim','icon':Icons.schedule, 'color': const Color(0xFF4E342E), 'label':'Nebelheim'},
+      {'id':'lighthouse','icon':Icons.sailing, 'color': const Color(0xFF0D47A1), 'label':'Faro'},
+      {'id':'carnival','icon':Icons.celebration, 'color': const Color(0xFF6A1B9A), 'label':'Carnaval'},
+      {'id':'observatory','icon':Icons.star, 'color': const Color(0xFF1A237E), 'label':'Observatorio'},
+      {'id':'train','icon':Icons.train, 'color': const Color(0xFF3E2723), 'label':'Expreso'},
+      {'id':'abbey','icon':Icons.account_balance, 'color': const Color(0xFF3E2723), 'label':'Abadía'},
+    ];
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFFFFF3CD),
+        title: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collection ${collected.length}/90 · $secretsSolved/18 secrets' : 'Colección ${collected.length}/90 · $secretsSolved/18 secretos', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (isHolmes) Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.amber.shade200, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.amber.shade700, width: 2.5), boxShadow: [BoxShadow(color: Colors.amber.shade700.withOpacity(0.3), blurRadius: 8)]), child: Row(children: [Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.brown, shape: BoxShape.circle), child: const Icon(Icons.emoji_events, color: Colors.amber, size: 16)), const SizedBox(width: 8), Expanded(child: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Holmes golden frame unlocked! · 1500+ XP' : '¡Marco dorado Holmes desbloqueado! · 1500+ XP', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.brown)))])),
+            // — Recompensas con imagen —
+            Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Rewards (images)' : 'Recompensas (imágenes)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
+            const SizedBox(height: 6),
+            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.88), itemCount: rewardData.length, itemBuilder: (_, i) {
+              final r = rewardData[i];
+              final unlocked = rewards.contains(r['id']);
+              final holmesFrame = isHolmes && unlocked;
+              final asset = 'assets/rewards/${r['id']}.png';
+              return Container(
+                decoration: BoxDecoration(
+                  color: unlocked ? Colors.white : Colors.brown.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: holmesFrame ? Colors.amber.shade700 : (unlocked ? Colors.amber : Colors.brown.shade300), width: holmesFrame ? 3 : 1.5),
+                  boxShadow: holmesFrame ? [BoxShadow(color: Colors.amber.withValues(alpha:0.5), blurRadius: 6)] : null,
+                ),
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Stack(alignment: Alignment.center, children: [
+                      Image.asset(asset, width: 72, height: 72, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(width:72,height:72,color:(r['color'] as Color),child: Icon(r['icon'] as IconData, color: Colors.amber.shade200))),
+                      if (!unlocked) Container(width:72,height:72,color: Colors.black54, child: const Icon(Icons.lock, size: 22, color: Colors.white70)),
+                      if (holmesFrame) Positioned(top:2,right:2,child: Container(padding:const EdgeInsets.all(2), decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle), child: const Icon(Icons.emoji_events, size: 10, color: Colors.brown))),
+                    ]),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(r['label'] as String, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: unlocked ? Colors.brown.shade800 : Colors.brown.shade400), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(unlocked ? '✔ ${AppLocalizations.of(context).locale.languageCode=='en'?'Unlocked':'Desbloqueada'}' : '🔒', style: const TextStyle(fontSize: 9)),
+                ]),
+              );
+            }),
+            const SizedBox(height: 12),
+            // — Secretos 18 —
+            Text('${AppLocalizations.of(context).locale.languageCode == 'en' ? 'Secrets' : 'Secretos'} $secretsSolved/18', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
+            const SizedBox(height: 6),
+            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, crossAxisSpacing: 6, mainAxisSpacing: 6, childAspectRatio: 0.85), itemCount: 18, itemBuilder: (_, i) {
+              final id = secretIds[i];
+              final solved = allSecrets.contains(id) || allSolved.contains(id);
+              final asset = 'assets/rewards/secrets/$id.png';
+              return Container(
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: solved ? Colors.amber.shade700 : Colors.brown.shade300, width: solved ? 2 : 1)),
+                child: ClipRRect(borderRadius: BorderRadius.circular(7), child: Stack(fit: StackFit.expand, children: [
+                  Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(color: Colors.brown.shade100, child: Icon(Icons.lock, size: 16, color: Colors.brown.shade400))),
+                  if (!solved) Container(color: Colors.black54, child: const Icon(Icons.lock, size: 16, color: Colors.white70)),
+                ])),
+              );
+            }),
+            const SizedBox(height: 4),
+            Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Branch (101-112) + Deduction (113-118)' : 'Ramificados (101-112) + Deducción (113-118)', style: const TextStyle(fontSize: 10, color: Colors.brown)),
+            const SizedBox(height: 12),
+            // — Coleccionables 90 —
+            Text('${AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collectibles' : 'Coleccionables'} ${collected.length}/90', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
+            const SizedBox(height: 6),
+            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, crossAxisSpacing: 6, mainAxisSpacing: 6, childAspectRatio: 0.85), itemCount: allCollectibles.length, itemBuilder: (_, i) {
+                final id = allCollectibles[i];
+                final hasIt = collected.contains(id);
+                final asset = 'assets/rewards/collectibles/$id.png';
+                return Container(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: hasIt ? Colors.amber.shade700 : Colors.brown.shade200, width: hasIt ? 2 : 1)),
+                  child: ClipRRect(borderRadius: BorderRadius.circular(7), child: Stack(fit: StackFit.expand, children: [
+                    Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(color: hasIt ? Colors.amber.shade100 : Colors.brown.shade50, child: Icon(hasIt ? Icons.emoji_events : Icons.lock_outline, size: 14, color: hasIt ? Colors.brown : Colors.brown.shade300))),
+                    if (!hasIt) Container(color: Colors.black45, child: const Icon(Icons.lock_outline, size: 14, color: Colors.white70)),
+                  ])),
+                );
+              }),
+          ]),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(AppLocalizations.of(context).tr('cancel') == 'Cancelar' ? 'Cerrar' : 'Close'))],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -123,6 +234,59 @@ class LibraryPage extends StatelessWidget {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.amber),
+            tooltip: l10n.locale.languageCode == 'en' ? 'Settings' : 'Ajustes',
+            onPressed: () => showDialog(context: context, builder: (_) {
+              final a11y = di.sl<AccessibilityService>();
+              final sync = di.sl<SyncService>();
+              final progress = di.sl<BookProgressRepository>();
+              final daily = di.sl<DailyPuzzleRepository>();
+              return StatefulBuilder(builder: (c, setSt) {
+                return AlertDialog(
+                  backgroundColor: const Color(0xFFFFF3CD),
+                  title: Text(l10n.locale.languageCode == 'en' ? 'Accessibility & Sync' : 'Accesibilidad y Sincronización', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    // Alto contraste — operativo: persiste y cambia scaffold a negro
+                    ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, hc, __) => SwitchListTile(
+                      secondary: Icon(Icons.contrast, color: hc ? Colors.amber.shade700 : Colors.brown),
+                      title: Text(l10n.locale.languageCode == 'en' ? 'High contrast' : 'Alto contraste', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                      subtitle: Text(hc ? (l10n.locale.languageCode == 'en' ? 'Black background · ON' : 'Fondo negro · ACTIVADO') : (l10n.locale.languageCode == 'en' ? 'Standard theme' : 'Tema estándar'), style: const TextStyle(fontSize: 11)),
+                      value: hc,
+                      onChanged: (_) async { await a11y.toggleHighContrast(); setSt((){}); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(a11y.isHighContrast ? (l10n.locale.languageCode=='en'?'High contrast ON':'Contraste alto ACTIVADO') : (l10n.locale.languageCode=='en'?'High contrast OFF':'Contraste alto DESACTIVADO')))); },
+                    )),
+                    const Divider(),
+                    // Fuente grande — operativo: 1.0 -> 1.3 -> 1.6 via MediaQuery textScaler
+                    ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, __, ___) => ListTile(
+                      leading: const Icon(Icons.text_fields, color: Colors.brown),
+                      title: Text('${l10n.locale.languageCode == 'en' ? 'Large font' : 'Fuente grande'} · ${a11y.fontLabel}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                      subtitle: Text(l10n.locale.languageCode == 'en' ? 'Applies to all pages (MediaQuery)' : 'Se aplica a toda la app (MediaQuery)', style: const TextStyle(fontSize: 11)),
+                      trailing: const Icon(Icons.swap_horiz, size: 18),
+                      onTap: () async { await a11y.cycleFontScale(); setSt((){}); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${a11y.fontLabel} · ${a11y.fontScale}x'))); },
+                    )),
+                    const Divider(),
+                    // Compartir postal — operativo: share_plus con texto real del progreso
+                    ListTile(leading: const Icon(Icons.share, color: Colors.brown), title: Text(l10n.locale.languageCode == 'en' ? 'Share case postal' : 'Compartir postal del caso', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'Rank + XP + collection via share' : 'Rango + XP + colección vía compartir', style: const TextStyle(fontSize: 11)), onTap: () async { Navigator.pop(c); await sync.sharePostal(progress, daily, l10n.locale.languageCode); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Postal shared!':'¡Postal compartida!'))); }),
+                    // Exportar .elemental — operativo: JSON + ShareXFiles
+                    ListTile(leading: const Icon(Icons.save_alt, color: Colors.brown), title: Text(l10n.locale.languageCode == 'en' ? 'Export .elemental' : 'Exportar .elemental', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'JSON with all progress · share file' : 'JSON con todo el progreso · compartir archivo', style: const TextStyle(fontSize: 11)), onTap: () async { Navigator.pop(c); await sync.shareExport(); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Exported .elemental':'Exportado .elemental'))); }),
+                    // Daily seed — operativo: copia al portapapeles
+                    ListTile(leading: const Icon(Icons.link, color: Colors.brown), title: Text('Daily seed: elemental://daily/${DateTime.now().toIso8601String().split('T').first}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'Tap to copy link' : 'Toca para copiar enlace', style: const TextStyle(fontSize: 11)), onTap: () async { await sync.copyDailyLink(); if (c.mounted) Navigator.pop(c); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Link copied!':'¡Enlace copiado!'))); }),
+                  ])),
+                  actions: [TextButton(onPressed: ()=> Navigator.pop(c), child: Text(l10n.tr('cancel') == 'Cancelar' ? 'Cerrar' : 'Close'))],
+                );
+              });
+            }),
+          ),
+          IconButton(
+            icon: const Icon(Icons.map, color: Colors.amber),
+            tooltip: l10n.locale.languageCode == 'en' ? 'Map' : 'Mapa',
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MapPage(onSelect: (a) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.locale.languageCode=='en'?'Alley':'Callejón'} $a'))); }))),
+          ),
+          IconButton(
+            icon: const Icon(Icons.collections, color: Colors.amber),
+            tooltip: AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collection' : 'Colección',
+            onPressed: () => _showGallery(context),
+          ),
           // Selector idioma ES/EN
           PopupMenuButton<String>(
             icon: const Icon(Icons.language, color: Colors.amber),
@@ -340,6 +504,7 @@ class LibraryPage extends StatelessWidget {
     final progress =
         book.pageCount == 0 ? 0.0 : solved / book.pageCount;
 
+    final isHolmes = di.sl<BookProgressRepository>().isHolmesRank;
     return Opacity(
       opacity: unlocked ? 1.0 : 0.75,
       child: Card(
@@ -348,8 +513,8 @@ class LibraryPage extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-              color: completed ? Colors.green.shade700 : Colors.amber,
-              width: completed ? 2.5 : 1.5),
+              color: isHolmes ? Colors.amber.shade700 : (completed ? Colors.green.shade700 : Colors.amber),
+              width: isHolmes ? 3.5 : (completed ? 2.5 : 1.5)),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),

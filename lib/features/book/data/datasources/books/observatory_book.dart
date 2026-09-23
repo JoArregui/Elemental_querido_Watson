@@ -13,7 +13,7 @@ Future<StoryBook> buildObservatoryBook(
 
   final pages = [
     BookPage(
-      pageNumber: 1,
+      pageNumber: 1, collectibleId: 'observatory-1',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La noche del cometa',
       storyTitle: 'Cumbre Estrellada',
@@ -24,7 +24,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('049'),
     ),
     BookPage(
-      pageNumber: 2,
+      pageNumber: 2, collectibleId: 'observatory-2',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La noche del cometa',
       storyTitle: 'El saco de harina del refugio',
@@ -34,7 +34,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('050'),
     ),
     BookPage(
-      pageNumber: 3,
+      pageNumber: 3, collectibleId: 'observatory-3',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La noche del cometa',
       storyTitle: 'Dados bajo las estrellas',
@@ -45,7 +45,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('052'),
     ),
     BookPage(
-      pageNumber: 4,
+      pageNumber: 4, collectibleId: 'observatory-4',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La noche del cometa',
       storyTitle: 'Las monedas del planetario',
@@ -55,7 +55,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('055'),
     ),
     BookPage(
-      pageNumber: 5,
+      pageNumber: 5, collectibleId: 'observatory-5',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La noche del cometa',
       storyTitle: 'La balanza del astrónomo (VISUAL)',
@@ -78,7 +78,7 @@ Future<StoryBook> buildObservatoryBook(
       ),
     ),
     BookPage(
-      pageNumber: 6,
+      pageNumber: 6, collectibleId: 'observatory-6',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El cometa Azul',
       storyTitle: 'La rueda del funicular',
@@ -88,7 +88,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('056'),
     ),
     BookPage(
-      pageNumber: 7,
+      pageNumber: 7, collectibleId: 'observatory-7',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El cometa Azul',
       storyTitle: 'La serie de la cúpula',
@@ -99,7 +99,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('063'),
     ),
     BookPage(
-      pageNumber: 8,
+      pageNumber: 8, collectibleId: 'observatory-8',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El cometa Azul',
       storyTitle: 'La cantina del telescopio',
@@ -110,7 +110,7 @@ Future<StoryBook> buildObservatoryBook(
       puzzle: byId('065'),
     ),
     BookPage(
-      pageNumber: 9,
+      pageNumber: 9, collectibleId: 'observatory-9',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El cometa Azul',
       storyTitle: 'El friso de las constelaciones (VISUAL)',
@@ -132,7 +132,7 @@ Future<StoryBook> buildObservatoryBook(
       ),
     ),
     BookPage(
-      pageNumber: 10,
+      pageNumber: 10, collectibleId: 'observatory-10',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El cometa Azul',
       storyTitle: 'El mosaico del firmamento (VISUAL FINAL)',
