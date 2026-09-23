@@ -12,7 +12,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
 
   final pages = [
     BookPage(
-      pageNumber: 1,
+      pageNumber: 1, collectibleId: 'carnival-1',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La máscara de oro',
       storyTitle: 'Confeti y sospechosos',
@@ -23,7 +23,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('020'),
     ),
     BookPage(
-      pageNumber: 2,
+      pageNumber: 2, collectibleId: 'carnival-2',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La máscara de oro',
       storyTitle: 'El pozo de la plaza',
@@ -33,7 +33,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('021'),
     ),
     BookPage(
-      pageNumber: 3,
+      pageNumber: 3, collectibleId: 'carnival-3',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La máscara de oro',
       storyTitle: 'Gatos y ratones de atrezo',
@@ -43,7 +43,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('033'),
     ),
     BookPage(
-      pageNumber: 4,
+      pageNumber: 4, collectibleId: 'carnival-4',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La máscara de oro',
       storyTitle: 'La mosca del tranvía',
@@ -54,7 +54,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('034'),
     ),
     BookPage(
-      pageNumber: 5,
+      pageNumber: 5, collectibleId: 'carnival-5',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La máscara de oro',
       storyTitle: 'El escaparate del cerillero (VISUAL)',
@@ -76,7 +76,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       ),
     ),
     BookPage(
-      pageNumber: 6,
+      pageNumber: 6, collectibleId: 'carnival-6',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'El pastor de la carroza',
@@ -86,7 +86,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('036'),
     ),
     BookPage(
-      pageNumber: 7,
+      pageNumber: 7, collectibleId: 'carnival-7',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'La pirámide de farolillos',
@@ -97,7 +97,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('037'),
     ),
     BookPage(
-      pageNumber: 8,
+      pageNumber: 8, collectibleId: 'carnival-8',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'Cuatro nueves de terciopelo',
@@ -107,7 +107,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('039'),
     ),
     BookPage(
-      pageNumber: 9,
+      pageNumber: 9, collectibleId: 'carnival-9',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'El retrato del dogo',
@@ -118,7 +118,7 @@ Future<StoryBook> buildCarnivalBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('040'),
     ),
     BookPage(
-      pageNumber: 10,
+      pageNumber: 10, collectibleId: 'carnival-10',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El baile de medianoche',
       storyTitle: 'Se cae la máscara',

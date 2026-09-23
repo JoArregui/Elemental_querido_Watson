@@ -2,8 +2,11 @@ import 'package:get_it/get_it.dart';
 import 'features/book/data/datasources/book_local_data_source.dart';
 import 'features/book/data/repositories/book_progress_repository.dart';
 import 'features/book/data/repositories/daily_puzzle_repository.dart';
+import 'core/services/accessibility_service.dart';
+import 'core/services/audio_service.dart';
 import 'core/services/feedback_service.dart';
 import 'core/services/locale_service.dart';
+import 'core/services/sync_service.dart';
 import 'features/book/data/services/tts_service.dart';
 import 'features/book/presentation/bloc/book_bloc.dart';
 import 'features/book/presentation/bloc/library_bloc.dart';
@@ -51,10 +54,15 @@ Future<void> init() async {
   // Voz para el modo audiolibro (se inicializa al primer uso).
   sl.registerLazySingleton(() => TtsService());
   sl.registerLazySingleton(() => FeedbackService());
+  sl.registerLazySingleton(() => AudioService());
   sl.registerLazySingleton(() => DailyPuzzleRepository());
+  sl.registerLazySingleton(() => SyncService());
   final localeService = LocaleService();
   await localeService.init();
   sl.registerSingleton<LocaleService>(localeService);
+  final a11y = AccessibilityService();
+  await a11y.init();
+  sl.registerSingleton<AccessibilityService>(a11y);
 
   // Data sources
   sl.registerLazySingleton<PuzzleLocalDataSource>(

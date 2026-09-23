@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/services/locale_service.dart';
+import '../../domain/entities/puzzle.dart';
 import '../models/puzzle_model.dart';
 
 abstract class PuzzleLocalDataSource {
@@ -918,6 +919,28 @@ class PuzzleLocalDataSourceImpl implements PuzzleLocalDataSource {
       hints: ['El único dígito individual máximo que permite sumar 27 con 3 cifras es el 9.', 'Pista 2: busca el detalle oculto en el enunciado.', 'Pista 3: la respuesta es mas simple de lo que parece - piensa lateral.'],
     ),
   
+  
+
+    PuzzleModel(id: '113', title: 'Puzle 113: Deducción Nebelheim', statement: '¿Quién detuvo la torre? Elige: alcalde, relojero o niña.', experiencia: 30, correctAnswer: 'alcalde', hintText: 'Crow confesó.', hints: ['Crow confesó.', 'Hija.', 'alcalde.'], type: PuzzleType.multipleChoice, options: ['alcalde','relojero','niña']),
+    PuzzleModel(id: '114', title: 'Puzle 114: Deducción Faro', statement: '¿Quién apagó el faro? Elige: contrabandista, torrero o gaviota.', experiencia: 30, correctAnswer: 'contrabandista', hintText: 'Contrabando.', hints: ['Contrabando.', 'Marea.', 'contrabandista.'], type: PuzzleType.multipleChoice, options: ['contrabandista','torrero','gaviota']),
+    PuzzleModel(id: '115', title: 'Puzle 115: Deducción Carnaval', statement: '¿Quién robó la máscara? Elige: maestro, arlequín o niña.', experiencia: 30, correctAnswer: 'maestro', hintText: 'Polvo de oro.', hints: ['Polvo.', 'Guantes.', 'maestro.'], type: PuzzleType.multipleChoice, options: ['maestro','arlequín','niña']),
+    PuzzleModel(id: '116', title: 'Puzle 116: Deducción Observatorio', statement: '¿Quién robó la lente? Elige: fundador, coleccionista o Vega.', experiencia: 30, correctAnswer: 'coleccionista', hintText: 'Coleccionista.', hints: ['Coleccionista.', 'Sin escrúpulos.', 'coleccionista.'], type: PuzzleType.multipleChoice, options: ['fundador','coleccionista','Vega']),
+    PuzzleModel(id: '117', title: 'Puzle 117: Deducción Expreso', statement: '¿Quién es el banquero? Elige: pasajero 7, revisor o niño.', experiencia: 30, correctAnswer: 'pasajero 7', hintText: 'Compartimento 7.', hints: ['Compartimento.', '7.', 'pasajero 7.'], type: PuzzleType.multipleChoice, options: ['pasajero 7','revisor','niño']),
+    PuzzleModel(id: '118', title: 'Puzle 118: Deducción Abadía', statement: '¿Quién robó el relicario? Elige: ecónomo, hortelano o abad.', experiencia: 30, correctAnswer: 'ecónomo', hintText: 'Ecónomo.', hints: ['Ecónomo.', 'Bodega.', 'ecónomo.'], type: PuzzleType.multipleChoice, options: ['ecónomo','hortelano','abad']),
+
+    PuzzleModel(id: '101', title: 'Puzle 101: El atajo de Watson', statement: 'Watson intervino y abrió un pasadizo secreto: hay 3 puertas, solo una lleva a la salida. Eliges al azar. ¿Probabilidad de acertar a la primera? Responde en fracción (ej. 1/3)', experiencia: 20, correctAnswer: '1/3', hintText: '3 puertas, 1 correcta.', hints: ['3 puertas, 1 correcta.', 'Probabilidad clásica.', '1 de 3.']),
+    PuzzleModel(id: '102', title: 'Puzle 102: La nota alternativa', statement: 'La historia cambió: encuentras una segunda nota de Anselm con un código de 2 dígitos que suma 9. ¿Cuál es el mayor posible?', experiencia: 25, correctAnswer: '90', hintText: 'Mayor con suma 9 es 90.', hints: ['Suma 9.', '90 es mayor que 81.', '90.']),
+    PuzzleModel(id: '103', title: 'Puzle 103: Brújula rota', statement: 'Tras fallar, la brújula marca norte al azar entre 4 puntos cardinales. ¿Probabilidad de que acierte el norte?', experiencia: 15, correctAnswer: '1/4', hintText: '4 direcciones.', hints: ['4 puntos.', '1 de 4.', '1/4.']),
+    PuzzleModel(id: '104', title: 'Puzle 104: El faro alternativo', statement: 'El faro se enciende con un acertijo distinto: 2 faros destellan cada 6 y 9 segundos. ¿Cuándo coinciden?', experiencia: 25, correctAnswer: '18', hintText: 'MCM de 6 y 9.', hints: ['MCM.', '18 segundos.', '18.']),
+    PuzzleModel(id: '105', title: 'Puzle 105: Máscara distinta', statement: 'La máscara alternativa es de plata: 3 cajas, 1 con máscara, todas mienten. ¿Dónde está?', experiencia: 30, correctAnswer: 'centro', hintText: 'Lógica de mentirosos.', hints: ['Solo una verdad.', 'Centro.', 'Centro.']),
+    PuzzleModel(id: '106', title: 'Puzle 106: El observatorio nublado', statement: 'Nubes tapan el cometa 2 noches de cada 5. ¿Probabilidad de verlo 2 noches seguidas?', experiencia: 30, correctAnswer: '9/25', hintText: '3/5 * 3/5.', hints: ['3/5 visible.', 'Cuadrado.', '9/25.']),
+    PuzzleModel(id: '107', title: 'Puzle 107: Vagón bifurcado', statement: 'El tren se bifurca: vía A 3 vagones, vía B 5 vagones. ¿Total combinaciones de elegir 1 de cada vía?', experiencia: 20, correctAnswer: '15', hintText: '3*5.', hints: ['Multiplica.', '15.', '15.']),
+    PuzzleModel(id: '108', title: 'Puzle 108: Cripta alternativa', statement: 'La cripta alternativa tiene 2x2 losas con un símbolo distinto. ¿Cuántos cuadrados hay?', experiencia: 20, correctAnswer: '5', hintText: '4+1.', hints: ['5.', '4+1.', '5.']),
+    PuzzleModel(id: '109', title: 'Puzle 109: El susurro correcto', statement: 'Watson corrigió: 2 susurros + 1 acierto = 3 pistas usadas. ¿Cuántos susurros tras 4 fallos?', experiencia: 15, correctAnswer: '2', hintText: 'Máx 2 susurros.', hints: ['Máx 2.', '2.', '2.']),
+    PuzzleModel(id: '110', title: 'Puzle 110: Ruta alternativa', statement: 'La ruta alternativa es 2 km más larga pero sin niebla. Si vas a 4 km/h, ¿cuánto tardas 6 km?', experiencia: 15, correctAnswer: '1.5', hintText: '6/4=1.5h.', hints: ['Divide.', '1.5.', '1.5.']),
+    PuzzleModel(id: '111', title: 'Puzle 111: El coleccionable perdido', statement: 'Perdiste un coleccionable al ramificar: había 18 en total, ahora tienes 17. ¿Cuántos te faltan?', experiencia: 10, correctAnswer: '1', hintText: '18-17.', hints: ['Resta.', '1.', '1.']),
+    PuzzleModel(id: '112', title: 'Puzle 112: Final ramificado', statement: 'Final ramificado: necesitas 2 llaves de 3. ¿Combinaciones posibles?', experiencia: 20, correctAnswer: '3', hintText: 'C(3,2)=3.', hints: ['Combinatoria.', '3.', '3.']),
+
   ];
 
   static const List<PuzzleModel> _enPuzzlesList = [
@@ -1821,6 +1844,30 @@ class PuzzleLocalDataSourceImpl implements PuzzleLocalDataSource {
       hintText: 'El único dígito individual máximo que permite sumar 27 con 3 cifras es el 9.',
       hints: ['El único dígito individual máximo que permite sumar 27 con 3 cifras es el 9.', 'Hint 2: look for the hidden detail in the statement.', 'Hint 3: the answer is simpler than it seems — think lateral.'],
     ),
+    // Branch puzzles 101-112 — historia alternativa al 2º fallo
+    
+  
+
+    PuzzleModel(id: '113', title: 'Puzle 113: Deducción Nebelheim', statement: '¿Quién detuvo la torre? Elige: alcalde, relojero o niña.', experiencia: 30, correctAnswer: 'alcalde', hintText: 'Crow confesó.', hints: ['Crow confesó.', 'Hija.', 'alcalde.'], type: PuzzleType.multipleChoice, options: ['alcalde','relojero','niña']),
+    PuzzleModel(id: '114', title: 'Puzle 114: Deducción Faro', statement: '¿Quién apagó el faro? Elige: contrabandista, torrero o gaviota.', experiencia: 30, correctAnswer: 'contrabandista', hintText: 'Contrabando.', hints: ['Contrabando.', 'Marea.', 'contrabandista.'], type: PuzzleType.multipleChoice, options: ['contrabandista','torrero','gaviota']),
+    PuzzleModel(id: '115', title: 'Puzle 115: Deducción Carnaval', statement: '¿Quién robó la máscara? Elige: maestro, arlequín o niña.', experiencia: 30, correctAnswer: 'maestro', hintText: 'Polvo de oro.', hints: ['Polvo.', 'Guantes.', 'maestro.'], type: PuzzleType.multipleChoice, options: ['maestro','arlequín','niña']),
+    PuzzleModel(id: '116', title: 'Puzle 116: Deducción Observatorio', statement: '¿Quién robó la lente? Elige: fundador, coleccionista o Vega.', experiencia: 30, correctAnswer: 'coleccionista', hintText: 'Coleccionista.', hints: ['Coleccionista.', 'Sin escrúpulos.', 'coleccionista.'], type: PuzzleType.multipleChoice, options: ['fundador','coleccionista','Vega']),
+    PuzzleModel(id: '117', title: 'Puzle 117: Deducción Expreso', statement: '¿Quién es el banquero? Elige: pasajero 7, revisor o niño.', experiencia: 30, correctAnswer: 'pasajero 7', hintText: 'Compartimento 7.', hints: ['Compartimento.', '7.', 'pasajero 7.'], type: PuzzleType.multipleChoice, options: ['pasajero 7','revisor','niño']),
+    PuzzleModel(id: '118', title: 'Puzle 118: Deducción Abadía', statement: '¿Quién robó el relicario? Elige: ecónomo, hortelano o abad.', experiencia: 30, correctAnswer: 'ecónomo', hintText: 'Ecónomo.', hints: ['Ecónomo.', 'Bodega.', 'ecónomo.'], type: PuzzleType.multipleChoice, options: ['ecónomo','hortelano','abad']),
+
+    PuzzleModel(id: '101', title: 'Puzzle 101: Watson Shortcut', statement: 'Watson intervened and opened a secret passage: 3 doors, only one leads out. You choose at random. What is probability to hit at first? Answer as fraction (e.g. 1/3)', experiencia: 20, correctAnswer: '1/3', hintText: '3 doors, 1 correct.', hints: ['3 doors, 1 correct.', 'Classic probability.', '1 in 3.']),
+    PuzzleModel(id: '102', title: 'Puzzle 102: The Alternative Note', statement: 'Story changed: you find a second Anselm note with a 2-digit code summing to 9. What is the largest possible?', experiencia: 25, correctAnswer: '90', hintText: 'Largest with sum 9 is 90.', hints: ['Sum 9.', '90 >81.', '90.']),
+    PuzzleModel(id: '103', title: 'Puzzle 103: Broken Compass', statement: 'After failing, the compass points north at random among 4 cardinals. What is probability it hits north?', experiencia: 15, correctAnswer: '1/4', hintText: '4 directions.', hints: ['4 points.', '1 in 4.', '1/4.']),
+    PuzzleModel(id: '104', title: 'Puzzle 104: The Alternative Lighthouse', statement: 'Lighthouse lights with different riddle: 2 beacons flash every 6 and 9 seconds. When do they coincide?', experiencia: 25, correctAnswer: '18', hintText: 'LCM of 6 and 9.', hints: ['LCM.', '18 seconds.', '18.']),
+    PuzzleModel(id: '105', title: 'Puzzle 105: Different Mask', statement: 'Alternative silver mask: 3 boxes, 1 with mask, all lie. Where is it?', experiencia: 30, correctAnswer: 'center', hintText: 'Liar logic.', hints: ['Only one truth.', 'Center.', 'Center.']),
+    PuzzleModel(id: '106', title: 'Puzzle 106: The Cloudy Observatory', statement: 'Clouds cover comet 2 nights of 5. What is probability to see it 2 nights in a row?', experiencia: 30, correctAnswer: '9/25', hintText: '3/5 * 3/5.', hints: ['3/5 visible.', 'Squared.', '9/25.']),
+    PuzzleModel(id: '107', title: 'Puzzle 107: Bifurcated Wagon', statement: 'Train bifurcates: track A 3 wagons, track B 5 wagons. How many combos choosing 1 of each?', experiencia: 20, correctAnswer: '15', hintText: '3*5.', hints: ['Multiply.', '15.', '15.']),
+    PuzzleModel(id: '108', title: 'Puzzle 108: Alternative Crypt', statement: 'Alternative crypt has 2x2 tiles with a different symbol. How many squares?', experiencia: 20, correctAnswer: '5', hintText: '4+1.', hints: ['5.', '4+1.', '5.']),
+    PuzzleModel(id: '109', title: 'Puzzle 109: The Correct Whisper', statement: 'Watson corrected: 2 whispers +1 solve =3 hints used. How many whispers after 4 fails?', experiencia: 15, correctAnswer: '2', hintText: 'Max 2 whispers.', hints: ['Max 2.', '2.', '2.']),
+    PuzzleModel(id: '110', title: 'Puzzle 110: Alternative Route', statement: 'Alternative route is 2 km longer but without fog. At 4 km/h, how long for 6 km?', experiencia: 15, correctAnswer: '1.5', hintText: '6/4=1.5h.', hints: ['Divide.', '1.5.', '1.5.']),
+    PuzzleModel(id: '111', title: 'Puzzle 111: The Lost Collectible', statement: 'You lost a collectible branching: 18 total, you have 17. How many missing?', experiencia: 10, correctAnswer: '1', hintText: '18-17.', hints: ['Subtract.', '1.', '1.']),
+    PuzzleModel(id: '112', title: 'Puzzle 112: Branched Ending', statement: 'Branched ending: need 2 keys of 3. How many combos possible?', experiencia: 20, correctAnswer: '3', hintText: 'C(3,2)=3.', hints: ['Combinatorics.', '3.', '3.']),
+
   ];
 
   bool get _isTest => WidgetsBinding.instance.runtimeType.toString().contains('Test');

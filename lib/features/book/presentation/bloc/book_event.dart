@@ -33,9 +33,10 @@ class PreviousPageEvent extends BookEvent {
 class SubmitPageAnswerEvent extends BookEvent {
   final String answer;
   final int hintsUsed; // A1: 0..3, penaliza -5 por pista
-  const SubmitPageAnswerEvent(this.answer, {this.hintsUsed = 0});
+  final bool timedBonus; // A2: bonus +30% si resuelve rápido
+  const SubmitPageAnswerEvent(this.answer, {this.hintsUsed = 0, this.timedBonus = false});
   @override
-  List<Object?> get props => [answer, hintsUsed];
+  List<Object?> get props => [answer, hintsUsed, timedBonus];
 }
 
 class ClearPageResultEvent extends BookEvent {

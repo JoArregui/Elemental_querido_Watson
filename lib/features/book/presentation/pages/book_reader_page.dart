@@ -8,7 +8,10 @@ import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/book_state.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/services/audio_service.dart';
 import '../../../../core/widgets/responsive.dart';
+import '../../../puzzle/data/datasources/puzzle_local_data_source.dart';
+import '../../data/repositories/book_progress_repository.dart';
 import '../widgets/puzzle_card.dart';
 import '../widgets/solved_celebration.dart';
 
@@ -27,6 +30,9 @@ class _BookReaderPageState extends State<BookReaderPage> {
   late final PageController _pageController;
   bool _syncing = false;
   bool _isReading = false;
+  bool _mirror = false;
+  bool _isTimed = false;
+  int _secondsLeft = 0;
   double _textScale = 1.0;
   TtsService? _tts;
 
@@ -34,13 +40,17 @@ class _BookReaderPageState extends State<BookReaderPage> {
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.96);
+    // Banda sonora por libro (placeholder)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      di.sl<AudioService>().playForBook(widget.bookId);
+    });
   }
 
   @override
   void dispose() {
-    // Sin setState: el elemento ya se está desmontando.
     _isReading = false;
     unawaited(_tts?.stop());
+    unawaited(di.sl<AudioService>().stop());
     _pageController.dispose();
     super.dispose();
   }
@@ -49,6 +59,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
     final svc = _tts ??= di.sl<TtsService>();
     svc.onComplete = () {
       if (mounted) setState(() => _isReading = false);
+      unawaited(di.sl<AudioService>().duck(false));
     };
     return svc;
   }
@@ -64,12 +75,14 @@ class _BookReaderPageState extends State<BookReaderPage> {
         'Acertijo de la página ${page.pageNumber}: '
         '${page.puzzle.title}. ${page.puzzle.statement}';
     setState(() => _isReading = true);
+    unawaited(di.sl<AudioService>().duck(true));
     await _ttsService().speak(text);
   }
 
   Future<void> _stopReading() async {
     if (!_isReading && _tts == null) return;
     setState(() => _isReading = false);
+    unawaited(di.sl<AudioService>().duck(false));
     await _ttsService().stop();
   }
 
@@ -172,10 +185,10 @@ class _BookReaderPageState extends State<BookReaderPage> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          tier == 'perfect' ? Icons.auto_stories : tier == 'good' ? Icons.menu_book : Icons.book_outlined,
-          size: 56,
-          color: tier == 'perfect' ? Colors.green.shade700 : Colors.brown,
+        // Imagen de recompensa (assets/rewards/<bookId>.png) si 100% o completado
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset('assets/rewards/${state.book.id}.png', width: 140, height: 140, fit: BoxFit.cover, errorBuilder: (_,__,___) => Icon(tier == 'perfect' ? Icons.auto_stories : tier == 'good' ? Icons.menu_book : Icons.book_outlined, size: 56, color: tier == 'perfect' ? Colors.green.shade700 : Colors.brown)),
         ),
         const SizedBox(height: 8),
         Text(
@@ -188,6 +201,11 @@ class _BookReaderPageState extends State<BookReaderPage> {
           endingQuote,
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        if (tier == 'perfect') Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.amber.shade700)), child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.emoji_events, size: 16, color: Colors.brown), const SizedBox(width: 6), Text(AppLocalizations.of(context).locale.languageCode=='en' ? 'Reward image unlocked!' : '¡Imagen de recompensa desbloqueada!', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.brown))]),
+          ),
         ),
         const SizedBox(height: 16),
         Container(
@@ -252,6 +270,57 @@ class _BookReaderPageState extends State<BookReaderPage> {
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.of(context).pop();
+              },
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, foregroundColor: Colors.black),
+              icon: const Icon(Icons.gavel),
+              label: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Final Deduction' : 'Deducción final',
+                  style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+              onPressed: () async {
+                Navigator.pop(context);
+                final deduceId = {'nebelheim':'113','lighthouse':'114','carnival':'115','observatory':'116','train':'117','abbey':'118'}[state.book.id] ?? '113';
+                try {
+                  final p = await di.sl<PuzzleLocalDataSource>().getPuzzle(deduceId);
+                  if (!context.mounted) return;
+                  final repo = di.sl<BookProgressRepository>();
+                  final alreadySolved = repo.secrets.contains(deduceId) || repo.allSolvedIds.contains(deduceId);
+                  if (!context.mounted) return;
+                  showDialog(context: context, builder: (dCtx) {
+                    int failedAttempts = 0;
+                    bool? lastCorrect;
+                    bool solved = alreadySolved;
+                    return StatefulBuilder(builder: (c, setSt) {
+                      return AlertDialog(
+                        backgroundColor: const Color(0xFFFFF3CD),
+                        title: Row(children: [const Icon(Icons.gavel, color: Colors.brown), const SizedBox(width: 8), Expanded(child: Text(p.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))]),
+                        content: SingleChildScrollView(child: PuzzleCard(
+                          puzzle: p,
+                          isSolved: solved,
+                          lastAnswerCorrect: lastCorrect,
+                          failedAttempts: failedAttempts,
+                          onSubmit: (ans, hints) async {
+                            if (solved) return;
+                            final ok = p.checkAnswer(ans);
+                            if (ok) {
+                              final penalty = (hints * 5).clamp(0, p.experiencia - 1);
+                              final awarded = (p.experiencia - penalty).clamp(1, 999);
+                              await repo.markSecretSolved(puzzleId: deduceId, experiencia: awarded);
+                              FeedbackService().success(); FeedbackService().celebrate();
+                              setSt(() { solved = true; lastCorrect = true; });
+                              if (c.mounted) ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(c).tr('correctXp', {'xp':'$awarded'})} · ${AppLocalizations.of(c).locale.languageCode=='en'?'Secret unlocked!':'¡Secreto desbloqueado!'}')));
+                            } else {
+                              FeedbackService().error();
+                              setSt(() { failedAttempts++; lastCorrect = false; });
+                            }
+                          },
+                        )),
+                        actions: [TextButton(onPressed: ()=> Navigator.pop(dCtx), child: Text(solved ? (AppLocalizations.of(c).locale.languageCode=='en'?'Close':'Cerrar') : AppLocalizations.of(c).tr('cancel')))],
+                      );
+                    });
+                  });
+                } catch (_) {}
               },
             ),
             const SizedBox(height: 8),
@@ -443,6 +512,11 @@ class _BookReaderPageState extends State<BookReaderPage> {
                     icon: const Icon(Icons.first_page, color: Colors.amber),
                     tooltip: AppLocalizations.of(context).tr('goToStart'),
                     onPressed: state.isFirstPage ? null : () => _goToFirst(state),
+                  ),
+                  IconButton(
+                    icon: Icon(_mirror ? Icons.flip : Icons.flip_outlined, color: Colors.amber),
+                    tooltip: _mirror ? 'Modo normal' : 'Modo espejo',
+                    onPressed: () => setState(() => _mirror = !_mirror),
                   ),
                   IconButton(
                     icon: const Icon(Icons.format_size, color: Colors.amber),
@@ -685,6 +759,13 @@ class _BookReaderPageState extends State<BookReaderPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (page.collectibleId != null)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.amber)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.emoji_events, size: 14, color: Colors.brown), const SizedBox(width: 6), Text('Coleccionable ${page.collectibleId}', style: const TextStyle(fontSize: 11, color: Colors.brown, fontWeight: FontWeight.bold))]),
+              ),
             Text(
               '${page.chapterLabel} · ${page.chapterTitle}',
               style: TextStyle(
@@ -731,17 +812,23 @@ class _BookReaderPageState extends State<BookReaderPage> {
               ),
             ),
             const SizedBox(height: 10),
-            PuzzleCard(
-              puzzle: page.puzzle,
-              isSolved: solved,
-              textScale: _textScale,
-              lastAnswerCorrect: isCurrent ? state.lastAnswerCorrect : null,
-              failedAttempts: isCurrent ? state.failedAttemptsOnPage : 0,
-              onSubmit: (answer, hintsUsed) {
-                if (isCurrent) {
-                  context.read<BookBloc>().add(SubmitPageAnswerEvent(answer, hintsUsed: hintsUsed));
-                }
-              },
+            Transform(
+              alignment: Alignment.center,
+              transform: _mirror ? Matrix4.diagonal3Values(-1, 1, 1) : Matrix4.identity(),
+              child: PuzzleCard(
+                puzzle: page.puzzle,
+                isSolved: solved,
+                textScale: _textScale,
+                lastAnswerCorrect: isCurrent ? state.lastAnswerCorrect : null,
+                failedAttempts: isCurrent ? state.failedAttemptsOnPage : 0,
+                onSubmit: (answer, hintsUsed) {
+                  if (isCurrent) {
+                    final bonus = _isTimed && _secondsLeft > 60;
+                    context.read<BookBloc>().add(SubmitPageAnswerEvent(answer, hintsUsed: hintsUsed, timedBonus: bonus));
+                    if (bonus && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Time bonus +30% XP!' : '¡Bonus tiempo +30% XP!')));
+                  }
+                },
+              ),
             ),
             if (isCurrent) ...[
               if (!isLast && solved)

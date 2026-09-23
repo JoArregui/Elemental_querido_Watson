@@ -39,6 +39,11 @@ class DailyPuzzleRepository {
     return prefs.getInt(_streakKey) ?? 0;
   }
 
+  Future<bool> isTodaySolved() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_lastSolvedDateKey) == _todayString();
+  }
+
   Future<void> markTodaySolved() async {
     final prefs = await SharedPreferences.getInstance();
     final today = _todayString();

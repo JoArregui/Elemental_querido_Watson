@@ -12,7 +12,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
 
   final pages = [
     BookPage(
-      pageNumber: 1,
+      pageNumber: 1, collectibleId: 'abbey-1',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La galería que susurra',
       storyTitle: 'Niebla en el claustro',
@@ -22,7 +22,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('046'),
     ),
     BookPage(
-      pageNumber: 2,
+      pageNumber: 2, collectibleId: 'abbey-2',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La galería que susurra',
       storyTitle: 'El pescador del estanque',
@@ -32,7 +32,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('059'),
     ),
     BookPage(
-      pageNumber: 3,
+      pageNumber: 3, collectibleId: 'abbey-3',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La galería que susurra',
       storyTitle: 'Los hermanos del coro',
@@ -42,7 +42,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('060'),
     ),
     BookPage(
-      pageNumber: 4,
+      pageNumber: 4, collectibleId: 'abbey-4',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La galería que susurra',
       storyTitle: 'El cubo del albañil',
@@ -52,7 +52,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('062'),
     ),
     BookPage(
-      pageNumber: 5,
+      pageNumber: 5, collectibleId: 'abbey-5',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La galería que susurra',
       storyTitle: 'La mosca del vitral',
@@ -62,7 +62,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('066'),
     ),
     BookPage(
-      pageNumber: 6,
+      pageNumber: 6, collectibleId: 'abbey-6',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El manuscrito robado',
       storyTitle: 'El rosetón distinto (VISUAL)',
@@ -84,7 +84,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       ),
     ),
     BookPage(
-      pageNumber: 7,
+      pageNumber: 7, collectibleId: 'abbey-7',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El manuscrito robado',
       storyTitle: 'Las arcas del prior',
@@ -94,7 +94,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('068'),
     ),
     BookPage(
-      pageNumber: 8,
+      pageNumber: 8, collectibleId: 'abbey-8',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El manuscrito robado',
       storyTitle: 'El carro del hortelano',
@@ -104,7 +104,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('071'),
     ),
     BookPage(
-      pageNumber: 9,
+      pageNumber: 9, collectibleId: 'abbey-9',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El manuscrito robado',
       storyTitle: 'Las monedas del cepillo',
@@ -114,7 +114,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('073'),
     ),
     BookPage(
-      pageNumber: 10,
+      pageNumber: 10, collectibleId: 'abbey-10',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El manuscrito robado',
       storyTitle: 'El paseo del fantasma',
@@ -124,7 +124,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('076'),
     ),
     BookPage(
-      pageNumber: 11,
+      pageNumber: 11, collectibleId: 'abbey-11',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'El amanecer en el claustro',
       storyTitle: 'Las monedas del exvoto (VISUAL)',
@@ -147,7 +147,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       ),
     ),
     BookPage(
-      pageNumber: 12,
+      pageNumber: 12, collectibleId: 'abbey-12',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'El amanecer en el claustro',
       storyTitle: 'Las tijeras del sastre',
@@ -157,7 +157,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('078'),
     ),
     BookPage(
-      pageNumber: 13,
+      pageNumber: 13, collectibleId: 'abbey-13',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'El amanecer en el claustro',
       storyTitle: 'La baraja del sacristán',
@@ -167,7 +167,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('079'),
     ),
     BookPage(
-      pageNumber: 14,
+      pageNumber: 14, collectibleId: 'abbey-14',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'El amanecer en el claustro',
       storyTitle: 'El tonel de la bodega',
@@ -177,7 +177,7 @@ Future<StoryBook> buildAbbeyBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('082'),
     ),
     BookPage(
-      pageNumber: 15,
+      pageNumber: 15, collectibleId: 'abbey-15',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'El amanecer en el claustro',
       storyTitle: 'Las velas del amanecer',

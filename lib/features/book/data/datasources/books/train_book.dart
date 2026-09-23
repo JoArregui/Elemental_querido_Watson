@@ -12,7 +12,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
 
   final pages = [
     BookPage(
-      pageNumber: 1,
+      pageNumber: 1, collectibleId: 'train-1',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'El pasajero del compartimento 7',
       storyTitle: 'Billetes para el norte',
@@ -23,7 +23,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('011'),
     ),
     BookPage(
-      pageNumber: 2,
+      pageNumber: 2, collectibleId: 'train-2',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'El pasajero del compartimento 7',
       storyTitle: 'El pastel del vagón restaurante',
@@ -33,7 +33,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('012'),
     ),
     BookPage(
-      pageNumber: 3,
+      pageNumber: 3, collectibleId: 'train-3',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'El pasajero del compartimento 7',
       storyTitle: 'Cien almas a bordo',
@@ -43,7 +43,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('013'),
     ),
     BookPage(
-      pageNumber: 4,
+      pageNumber: 4, collectibleId: 'train-4',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'El pasajero del compartimento 7',
       storyTitle: 'Caramelos para el testigo',
@@ -53,7 +53,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('016'),
     ),
     BookPage(
-      pageNumber: 5,
+      pageNumber: 5, collectibleId: 'train-5',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'El pasajero del compartimento 7',
       storyTitle: 'Los cubos del equipaje',
@@ -63,7 +63,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('022'),
     ),
     BookPage(
-      pageNumber: 6,
+      pageNumber: 6, collectibleId: 'train-6',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El túnel sin luz',
       storyTitle: 'Manzanas en la penumbra',
@@ -73,7 +73,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('024'),
     ),
     BookPage(
-      pageNumber: 7,
+      pageNumber: 7, collectibleId: 'train-7',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El túnel sin luz',
       storyTitle: 'Las cajas del correo',
@@ -83,7 +83,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('026'),
     ),
     BookPage(
-      pageNumber: 8,
+      pageNumber: 8, collectibleId: 'train-8',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El túnel sin luz',
       storyTitle: 'Los tres cofres del banquero (VISUAL)',
@@ -106,7 +106,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       ),
     ),
     BookPage(
-      pageNumber: 9,
+      pageNumber: 9, collectibleId: 'train-9',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El túnel sin luz',
       storyTitle: 'Huellas en la nieve',
@@ -116,7 +116,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('029'),
     ),
     BookPage(
-      pageNumber: 10,
+      pageNumber: 10, collectibleId: 'train-10',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'El túnel sin luz',
       storyTitle: 'La partida del revisor',
@@ -126,7 +126,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('030'),
     ),
     BookPage(
-      pageNumber: 11,
+      pageNumber: 11, collectibleId: 'train-11',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La estación final',
       storyTitle: 'El cumpleaños del maquinista',
@@ -136,7 +136,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('031'),
     ),
     BookPage(
-      pageNumber: 12,
+      pageNumber: 12, collectibleId: 'train-12',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La estación final',
       storyTitle: 'Las lámparas del andén',
@@ -146,7 +146,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('041'),
     ),
     BookPage(
-      pageNumber: 13,
+      pageNumber: 13, collectibleId: 'train-13',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La estación final',
       storyTitle: 'El mosaico del vestíbulo (VISUAL)',
@@ -168,7 +168,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       ),
     ),
     BookPage(
-      pageNumber: 14,
+      pageNumber: 14, collectibleId: 'train-14',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La estación final',
       storyTitle: 'Los relojes de arena',
@@ -178,7 +178,7 @@ Future<StoryBook> buildTrainBook(PuzzleLocalDataSource classic) async {
       puzzle: byId('042'),
     ),
     BookPage(
-      pageNumber: 15,
+      pageNumber: 15, collectibleId: 'train-15',
       chapterLabel: 'Capítulo 3',
       chapterTitle: 'La estación final',
       storyTitle: 'La cesta del andén',

@@ -24,6 +24,8 @@ class BookLoaded extends BookState {
   final int totalexperiencia;
   final bool? lastAnswerCorrect;
   final int failedAttemptsOnPage;
+  final Set<String> branchedPuzzleIds;
+  final bool lastWasAlternative;
 
   const BookLoaded({
     required this.book,
@@ -33,6 +35,8 @@ class BookLoaded extends BookState {
     required this.totalexperiencia,
     this.lastAnswerCorrect,
     this.failedAttemptsOnPage = 0,
+    this.branchedPuzzleIds = const {},
+    this.lastWasAlternative = false,
   });
 
   BookPage get currentPage => pages[currentIndex];
@@ -95,6 +99,8 @@ class BookLoaded extends BookState {
     int? totalexperiencia,
     bool? Function()? lastAnswerCorrect,
     int? failedAttemptsOnPage,
+    Set<String>? branchedPuzzleIds,
+    bool? lastWasAlternative,
   }) {
     return BookLoaded(
       book: book ?? this.book,
@@ -104,8 +110,9 @@ class BookLoaded extends BookState {
       totalexperiencia: totalexperiencia ?? this.totalexperiencia,
       lastAnswerCorrect:
           lastAnswerCorrect != null ? lastAnswerCorrect() : this.lastAnswerCorrect,
-      failedAttemptsOnPage:
-          failedAttemptsOnPage ?? this.failedAttemptsOnPage,
+      failedAttemptsOnPage: failedAttemptsOnPage ?? this.failedAttemptsOnPage,
+      branchedPuzzleIds: branchedPuzzleIds ?? this.branchedPuzzleIds,
+      lastWasAlternative: lastWasAlternative ?? this.lastWasAlternative,
     );
   }
 
@@ -118,6 +125,8 @@ class BookLoaded extends BookState {
         totalexperiencia,
         lastAnswerCorrect,
         failedAttemptsOnPage,
+        branchedPuzzleIds,
+        lastWasAlternative,
       ];
 }
 

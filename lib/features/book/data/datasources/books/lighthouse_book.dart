@@ -13,7 +13,7 @@ Future<StoryBook> buildLighthouseBook(
 
   final pages = [
     BookPage(
-      pageNumber: 1,
+      pageNumber: 1, collectibleId: 'lighthouse-1',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La luz apagada',
       storyTitle: 'Marealta sin faro',
@@ -24,7 +24,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('007'),
     ),
     BookPage(
-      pageNumber: 2,
+      pageNumber: 2, collectibleId: 'lighthouse-2',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La luz apagada',
       storyTitle: 'La cuerda del muelle',
@@ -35,7 +35,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('008'),
     ),
     BookPage(
-      pageNumber: 3,
+      pageNumber: 3, collectibleId: 'lighthouse-3',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La luz apagada',
       storyTitle: 'Cuatro gorros de lana',
@@ -46,7 +46,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('003'),
     ),
     BookPage(
-      pageNumber: 4,
+      pageNumber: 4, collectibleId: 'lighthouse-4',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La luz apagada',
       storyTitle: 'La vela del torrero',
@@ -57,7 +57,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('004'),
     ),
     BookPage(
-      pageNumber: 5,
+      pageNumber: 5, collectibleId: 'lighthouse-5',
       chapterLabel: 'Capítulo 1',
       chapterTitle: 'La luz apagada',
       storyTitle: 'El mosaico de caracolas (VISUAL)',
@@ -80,7 +80,7 @@ Future<StoryBook> buildLighthouseBook(
       ),
     ),
     BookPage(
-      pageNumber: 6,
+      pageNumber: 6, collectibleId: 'lighthouse-6',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'El padre y el grumete',
@@ -91,7 +91,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('009'),
     ),
     BookPage(
-      pageNumber: 7,
+      pageNumber: 7, collectibleId: 'lighthouse-7',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'El gato del faro',
@@ -102,7 +102,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('010'),
     ),
     BookPage(
-      pageNumber: 8,
+      pageNumber: 8, collectibleId: 'lighthouse-8',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'Los tres interruptores del sótano',
@@ -113,7 +113,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('005'),
     ),
     BookPage(
-      pageNumber: 9,
+      pageNumber: 9, collectibleId: 'lighthouse-9',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'Doce meses de niebla',
@@ -124,7 +124,7 @@ Future<StoryBook> buildLighthouseBook(
       puzzle: byId('069'),
     ),
     BookPage(
-      pageNumber: 10,
+      pageNumber: 10, collectibleId: 'lighthouse-10',
       chapterLabel: 'Capítulo 2',
       chapterTitle: 'La Marea del contrabando',
       storyTitle: 'La luz vuelve a casa',

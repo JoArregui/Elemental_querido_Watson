@@ -47,6 +47,10 @@ class _PuzzleCardState extends State<PuzzleCard> {
       _hintLevel = 0;
     }
     if (widget.isSolved) _hintLevel = 0;
+    if (!widget.isSolved && widget.failedAttempts > oldWidget.failedAttempts) {
+      if (widget.failedAttempts == 1) _hintLevel = 1;
+      if (widget.failedAttempts == 2) _hintLevel = 2;
+    }
   }
 
   @override
@@ -225,118 +229,51 @@ class _PuzzleCardState extends State<PuzzleCard> {
                         TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               ),
             ],
-          if (!widget.isSolved) ...[
+          if (_showHint) ...[
             const SizedBox(height: 8),
-            // A1: Pistas progresivas 3 niveles (coste XP informado)
-            Builder(builder: (context) {
-              final totalHints = p.allHints.length;
-              final canShowMore = _hintLevel < totalHints;
-              final hintCost = _hintLevel * 5; // 0, 5, 10 XP ya usados si se acierta
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.brown.shade800,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton.icon(
-                          icon: Icon(
-                              _showHint ? Icons.lightbulb : Icons.lightbulb_outline,
-                              size: 18),
-                          label: Text(
-                            _hintLevel == 0
-                                ? '${AppLocalizations.of(context).tr('hint')} 1/ $totalHints${widget.failedAttempts > 0 ? ' (${AppLocalizations.of(context).tr('hintRecommended')})' : ''}'
-                                : canShowMore
-                                    ? '${AppLocalizations.of(context).tr('hint')} ${_hintLevel + 1}/$totalHints (-5 XP)'
-                                    : AppLocalizations.of(context).tr('hideHints'),
-                          ),
-                          onPressed: () => setState(() {
-                            if (!canShowMore && _hintLevel > 0) {
-                              _hintLevel = 0;
-                            } else if (canShowMore) {
-                              _hintLevel++;
-                            }
-                          }),
+                  const Icon(Icons.person, color: Colors.amber, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context).locale.languageCode == 'en'
+                              ? 'Watson whispers:'
+                              : 'Watson susurra:',
+                          style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12),
                         ),
-                      ),
-                      if (_hintLevel > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: hintCost > 0 ? Colors.orange.shade100 : Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: hintCost > 0 ? Colors.orange.shade700 : Colors.green.shade300),
-                          ),
-                          child: Text(
-                            hintCost == 0 ? AppLocalizations.of(context).tr('free') : '-$hintCost XP',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: hintCost > 0 ? Colors.orange.shade900 : Colors.green.shade800,
-                            ),
-                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          p.hintForLevel(_hintLevel - 1),
+                          style: const TextStyle(color: Colors.white, fontSize: 13, fontStyle: FontStyle.italic),
                         ),
-                    ],
-                  ),
-                  if (_showHint)
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber.shade700),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.lightbulb, size: 18, color: Colors.brown),
-                              const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context).tr('hintLevel', {'level': '$_hintLevel', 'total': '$totalHints'}),
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold, color: Colors.brown, fontSize: 12)),
-                              const Spacer(),
-                              if (hintCost > 0)
-                                Text(AppLocalizations.of(context).tr('ifSolveNow', {'xp': '${(p.experiencia - hintCost).clamp(0, 999)}'}),
-                                    style: const TextStyle(fontSize: 11, color: Colors.brown)),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          // Muestra historial de pistas desbloqueadas
-                          ...List.generate(_hintLevel, (i) {
-                            final isLast = i == _hintLevel - 1;
-                            return Padding(
-                              padding: EdgeInsets.only(top: i == 0 ? 0 : 6),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('${i + 1}. ',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: isLast ? Colors.brown.shade800 : Colors.brown.shade400,
-                                          fontSize: 12)),
-                                  Expanded(
-                                    child: Text(
-                                      p.hintForLevel(i),
-                                      style: TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                        color: isLast ? Colors.black87 : Colors.black54,
-                                        fontWeight: isLast ? FontWeight.w600 : FontWeight.normal,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _hintLevel == 1
+                              ? (AppLocalizations.of(context).locale.languageCode == 'en'
+                                  ? 'Hint 1/3 (-5 XP if you solve now)'
+                                  : 'Pista 1/3 (-5 XP si aciertas ahora)')
+                              : (AppLocalizations.of(context).locale.languageCode == 'en'
+                                  ? 'Hint 2/3 (-10 XP) — next failure changes the story.'
+                                  : 'Pista 2/3 (-10 XP) — el siguiente fallo cambia la historia.'),
+                          style: const TextStyle(color: Colors.white70, fontSize: 11),
+                        ),
+                      ],
                     ),
+                  ),
                 ],
-              );
-            }),
+              ),
+            ),
           ],
           if (widget.lastAnswerCorrect == false && !widget.isSolved)
             Container(
