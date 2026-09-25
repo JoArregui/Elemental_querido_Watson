@@ -26,6 +26,8 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
 
   Future<void> _load(Emitter<LibraryState> emit) async {
     try {
+      // D1: contar sesión (una por carga de biblioteca)
+      try { await progress.incrementSessions(); } catch (_) {}
       final books = await dataSource.getLibrary();
       final solvedCounts = <String, int>{};
       final completed = <String>{};

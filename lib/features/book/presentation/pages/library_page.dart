@@ -5,11 +5,13 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/services/locale_service.dart';
 import '../../../../core/widgets/responsive.dart';
 import '../../../../core/services/accessibility_service.dart';
+import '../../../../core/services/reading_mode_service.dart';
 import '../../../../core/services/sync_service.dart';
 import '../../data/repositories/book_progress_repository.dart';
 import '../../data/repositories/daily_puzzle_repository.dart';
 import '../../domain/entities/story_book.dart';
 import 'map_page.dart';
+import 'stats_page.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/library_bloc.dart';
@@ -66,8 +68,7 @@ class LibraryPage extends StatelessWidget {
         ),
       ),
     ).then((_) {
-      // Al volver, refresca el progreso de la estantería.
-      // ignore: use_build_context_synchronously
+      if (!context.mounted) return;
       context.read<LibraryBloc>().add(const RefreshLibraryEvent());
     });
   }
@@ -141,7 +142,7 @@ class LibraryPage extends StatelessWidget {
         title: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collection ${collected.length}/90 · $secretsSolved/18 secrets' : 'Colección ${collected.length}/90 · $secretsSolved/18 secretos', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (isHolmes) Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.amber.shade200, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.amber.shade700, width: 2.5), boxShadow: [BoxShadow(color: Colors.amber.shade700.withOpacity(0.3), blurRadius: 8)]), child: Row(children: [Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.brown, shape: BoxShape.circle), child: const Icon(Icons.emoji_events, color: Colors.amber, size: 16)), const SizedBox(width: 8), Expanded(child: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Holmes golden frame unlocked! · 1500+ XP' : '¡Marco dorado Holmes desbloqueado! · 1500+ XP', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.brown)))])),
+            if (isHolmes) Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.amber.shade200, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.amber.shade700, width: 2.5), boxShadow: [BoxShadow(color: Colors.amber.shade700.withValues(alpha: 0.3), blurRadius: 8)]), child: Row(children: [Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.brown, shape: BoxShape.circle), child: const Icon(Icons.emoji_events, color: Colors.amber, size: 16)), const SizedBox(width: 8), Expanded(child: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Holmes golden frame unlocked! · 1500+ XP' : '¡Marco dorado Holmes desbloqueado! · 1500+ XP', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.brown)))])),
             // — Recompensas con imagen —
             Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Rewards (images)' : 'Recompensas (imágenes)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
             const SizedBox(height: 6),
@@ -191,6 +192,121 @@ class LibraryPage extends StatelessWidget {
             const SizedBox(height: 4),
             Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Branch (101-112) + Deduction (113-118)' : 'Ramificados (101-112) + Deducción (113-118)', style: const TextStyle(fontSize: 10, color: Colors.brown)),
             const SizedBox(height: 12),
+            // — Álbum de estrellas azules (Acertijo Final, sin XP): 1 hueco por libro —
+            Builder(builder: (ctx) {
+              final blue = repo.blueStarsCount;
+              final isEn = AppLocalizations.of(ctx).locale.languageCode == 'en';
+              return Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200, width: 1.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.star,
+                            size: 16,
+                            color: blue > 0
+                                ? Colors.blue.shade700
+                                : Colors.blue.shade200),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            isEn
+                                ? 'Blue stars $blue/6 · Final Riddle, no XP'
+                                : 'Estrellas azules $blue/6 · Acertijo Final, sin XP',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.brown),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 0.95),
+                      itemCount: rewardData.length,
+                      itemBuilder: (_, i) {
+                        final r = rewardData[i];
+                        final earned =
+                            repo.hasBlueStar(r['id'] as String);
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: earned
+                                ? Colors.white
+                                : Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: earned
+                                    ? Colors.blue.shade700
+                                    : Colors.blue.shade200,
+                                width: earned ? 2 : 1),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    earned
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    size: 34,
+                                    color: earned
+                                        ? Colors.blue.shade700
+                                        : Colors.blue.shade200,
+                                  ),
+                                  if (!earned)
+                                    const Icon(Icons.lock,
+                                        size: 14,
+                                        color: Colors.brown),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(r['label'] as String,
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: earned
+                                          ? Colors.blue.shade900
+                                          : Colors.brown.shade400),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                  earned
+                                      ? '★'
+                                      : (isEn
+                                          ? 'Missing'
+                                          : 'Pendiente'),
+                                  style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: earned
+                                          ? Colors.blue.shade700
+                                          : Colors.brown.shade400)),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 12),
             // — Coleccionables 90 —
             Text('${AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collectibles' : 'Coleccionables'} ${collected.length}/90', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
             const SizedBox(height: 6),
@@ -236,16 +352,20 @@ class LibraryPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.amber),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             tooltip: l10n.locale.languageCode == 'en' ? 'Settings' : 'Ajustes',
             onPressed: () => showDialog(context: context, builder: (_) {
               final a11y = di.sl<AccessibilityService>();
               final sync = di.sl<SyncService>();
               final progress = di.sl<BookProgressRepository>();
               final daily = di.sl<DailyPuzzleRepository>();
+              final readingMode = di.sl<ReadingModeService>();
               return StatefulBuilder(builder: (c, setSt) {
                 return AlertDialog(
                   backgroundColor: const Color(0xFFFFF3CD),
-                  title: Text(l10n.locale.languageCode == 'en' ? 'Accessibility & Sync' : 'Accesibilidad y Sincronización', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  title: Text(l10n.locale.languageCode == 'en' ? 'Settings' : 'Ajustes', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
                     // Alto contraste — operativo: persiste y cambia scaffold a negro
                     ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, hc, __) => SwitchListTile(
@@ -253,7 +373,7 @@ class LibraryPage extends StatelessWidget {
                       title: Text(l10n.locale.languageCode == 'en' ? 'High contrast' : 'Alto contraste', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                       subtitle: Text(hc ? (l10n.locale.languageCode == 'en' ? 'Black background · ON' : 'Fondo negro · ACTIVADO') : (l10n.locale.languageCode == 'en' ? 'Standard theme' : 'Tema estándar'), style: const TextStyle(fontSize: 11)),
                       value: hc,
-                      onChanged: (_) async { await a11y.toggleHighContrast(); setSt((){}); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(a11y.isHighContrast ? (l10n.locale.languageCode=='en'?'High contrast ON':'Contraste alto ACTIVADO') : (l10n.locale.languageCode=='en'?'High contrast OFF':'Contraste alto DESACTIVADO')))); },
+                      onChanged: (_) async { await a11y.toggleHighContrast(); setSt((){}); if (!context.mounted) return; ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(a11y.isHighContrast ? (l10n.locale.languageCode=='en'?'High contrast ON':'Contraste alto ACTIVADO') : (l10n.locale.languageCode=='en'?'High contrast OFF':'Contraste alto DESACTIVADO')))); },
                     )),
                     const Divider(),
                     // Fuente grande — operativo: 1.0 -> 1.3 -> 1.6 via MediaQuery textScaler
@@ -264,6 +384,38 @@ class LibraryPage extends StatelessWidget {
                       trailing: const Icon(Icons.swap_horiz, size: 18),
                       onTap: () async { await a11y.cycleFontScale(); setSt((){}); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${a11y.fontLabel} · ${a11y.fontScale}x'))); },
                     )),
+                    const Divider(),
+                    // Modo de juego: simple (navegación libre) o exigente (hay que acertar para pasar)
+                    ValueListenableBuilder<bool>(
+                      valueListenable: readingMode,
+                      builder: (_, strict, __) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.sports_esports, color: Colors.brown),
+                            title: Text(l10n.tr('readingMode'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          ),
+                          RadioListTile<bool>(
+                            value: false,
+                            groupValue: strict,
+                            dense: true,
+                            activeColor: Colors.brown.shade800,
+                            title: Text(l10n.tr('modeSimple'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                            subtitle: Text(l10n.tr('modeSimpleDesc'), style: const TextStyle(fontSize: 11)),
+                            onChanged: (_) async { await readingMode.setStrict(false); setSt((){}); },
+                          ),
+                          RadioListTile<bool>(
+                            value: true,
+                            groupValue: strict,
+                            dense: true,
+                            activeColor: Colors.brown.shade800,
+                            title: Text(l10n.tr('modeStrict'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                            subtitle: Text(l10n.tr('modeStrictDesc'), style: const TextStyle(fontSize: 11)),
+                            onChanged: (_) async { await readingMode.setStrict(true); setSt((){}); },
+                          ),
+                        ],
+                      ),
+                    ),
                     const Divider(),
                     // Compartir postal — operativo: share_plus con texto real del progreso
                     ListTile(leading: const Icon(Icons.share, color: Colors.brown), title: Text(l10n.locale.languageCode == 'en' ? 'Share case postal' : 'Compartir postal del caso', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'Rank + XP + collection via share' : 'Rango + XP + colección vía compartir', style: const TextStyle(fontSize: 11)), onTap: () async { Navigator.pop(c); await sync.sharePostal(progress, daily, l10n.locale.languageCode); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Postal shared!':'¡Postal compartida!'))); }),
@@ -277,50 +429,81 @@ class LibraryPage extends StatelessWidget {
               });
             }),
           ),
-          IconButton(
-            icon: const Icon(Icons.map, color: Colors.amber),
-            tooltip: l10n.locale.languageCode == 'en' ? 'Map' : 'Mapa',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MapPage(onSelect: (a) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.locale.languageCode=='en'?'Alley':'Callejón'} $a'))); }))),
-          ),
-          IconButton(
-            icon: const Icon(Icons.collections, color: Colors.amber),
-            tooltip: AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collection' : 'Colección',
-            onPressed: () => _showGallery(context),
-          ),
-          // Selector idioma ES/EN
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.language, color: Colors.amber),
-            tooltip: l10n.selectLanguage,
-            color: const Color(0xFFFFF3CD),
-            onSelected: (value) async {
-              final svc = di.sl<LocaleService>();
-              if (value == 'es') await svc.setLocale(const Locale('es'));
-              if (value == 'en') await svc.setLocale(const Locale('en'));
-              if (context.mounted) context.read<LibraryBloc>().add(const LoadLibraryEvent());
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'es',
-                child: Row(
-                  children: [
-                    Text(di.sl<LocaleService>().value.languageCode == 'es' ? '●' : '○', style: const TextStyle(color: Colors.brown)),
-                    const SizedBox(width: 8),
-                    Text(l10n.spanish),
-                  ],
+          if (!isPhone) ...[
+            IconButton(
+              icon: const Icon(Icons.map, color: Colors.amber),
+              visualDensity: VisualDensity.compact,
+              tooltip: l10n.locale.languageCode == 'en' ? 'Map' : 'Mapa',
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MapPage(onSelect: (a) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.locale.languageCode=='en'?'Alley':'Callejón'} $a'))); }))),
+            ),
+            IconButton(
+              icon: const Icon(Icons.collections, color: Colors.amber),
+              visualDensity: VisualDensity.compact,
+              tooltip: AppLocalizations.of(context).locale.languageCode == 'en' ? 'Collection' : 'Colección',
+              onPressed: () => _showGallery(context),
+            ),
+            IconButton(
+              icon: const Icon(Icons.bar_chart, color: Colors.amber),
+              visualDensity: VisualDensity.compact,
+              tooltip: AppLocalizations.of(context).locale.languageCode == 'en' ? 'Statistics' : 'Estadísticas',
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsPage())),
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.language, color: Colors.amber),
+              tooltip: l10n.selectLanguage,
+              color: const Color(0xFFFFF3CD),
+              onSelected: (value) async {
+                final svc = di.sl<LocaleService>();
+                if (value == 'es') await svc.setLocale(const Locale('es'));
+                if (value == 'en') await svc.setLocale(const Locale('en'));
+                if (context.mounted) context.read<LibraryBloc>().add(const LoadLibraryEvent());
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'es',
+                  child: Row(
+                    children: [
+                      Text(di.sl<LocaleService>().value.languageCode == 'es' ? '●' : '○', style: const TextStyle(color: Colors.brown)),
+                      const SizedBox(width: 8),
+                      Text(l10n.spanish),
+                    ],
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'en',
-                child: Row(
-                  children: [
-                    Text(di.sl<LocaleService>().value.languageCode == 'en' ? '●' : '○', style: const TextStyle(color: Colors.brown)),
-                    const SizedBox(width: 8),
-                    Text(l10n.english),
-                  ],
+                PopupMenuItem(
+                  value: 'en',
+                  child: Row(
+                    children: [
+                      Text(di.sl<LocaleService>().value.languageCode == 'en' ? '●' : '○', style: const TextStyle(color: Colors.brown)),
+                      const SizedBox(width: 8),
+                      Text(l10n.english),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ] else ...[
+            // En móvil: un único menú overflow para evitar overflowed
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.menu, color: Colors.amber),
+              tooltip: l10n.locale.languageCode == 'en' ? 'Menu' : 'Menú',
+              color: const Color(0xFFFFF3CD),
+              onSelected: (value) async {
+                if (value == 'map') Navigator.push(context, MaterialPageRoute(builder: (_) => MapPage(onSelect: (a) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.locale.languageCode=='en'?'Alley':'Callejón'} $a'))); })));
+                if (value == 'collection') _showGallery(context);
+                if (value == 'stats') Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsPage()));
+                if (value == 'es') { await di.sl<LocaleService>().setLocale(const Locale('es')); if (context.mounted) context.read<LibraryBloc>().add(const LoadLibraryEvent()); }
+                if (value == 'en') { await di.sl<LocaleService>().setLocale(const Locale('en')); if (context.mounted) context.read<LibraryBloc>().add(const LoadLibraryEvent()); }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'map', child: Row(children: [const Icon(Icons.map, color: Colors.brown, size: 18), const SizedBox(width: 8), Text(l10n.locale.languageCode == 'en' ? 'Map' : 'Mapa')])),
+                PopupMenuItem(value: 'collection', child: Row(children: [const Icon(Icons.collections, color: Colors.brown, size: 18), const SizedBox(width: 8), Text(l10n.locale.languageCode == 'en' ? 'Collection' : 'Colección')])),
+                PopupMenuItem(value: 'stats', child: Row(children: [const Icon(Icons.bar_chart, color: Colors.brown, size: 18), const SizedBox(width: 8), Text(l10n.locale.languageCode == 'en' ? 'Statistics' : 'Estadísticas')])),
+                const PopupMenuDivider(),
+                PopupMenuItem(value: 'es', child: Row(children: [Text(di.sl<LocaleService>().value.languageCode == 'es' ? '●' : '○', style: const TextStyle(color: Colors.brown)), const SizedBox(width: 8), Text(l10n.spanish)])),
+                PopupMenuItem(value: 'en', child: Row(children: [Text(di.sl<LocaleService>().value.languageCode == 'en' ? '●' : '○', style: const TextStyle(color: Colors.brown)), const SizedBox(width: 8), Text(l10n.english)])),
+              ],
+            ),
+          ],
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.amber),
             tooltip: l10n.tr('language') == 'Idioma' ? 'Opciones de partida' : 'Game options',
@@ -349,21 +532,22 @@ class LibraryPage extends StatelessWidget {
               if (total >= 1500) rank = l10n.tr('rankHolmes');
               else if (total >= 800) rank = l10n.tr('rankWatson');
               else if (total >= 300) rank = l10n.tr('rankInvestigator');
-              return Container(
+              // En móvil: solo ⭐ total para evitar overflowed (rank en tooltip)
+              final label = isPhone ? '⭐ $total' : '⭐ $total · $rank';
+              final chip = Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: EdgeInsets.symmetric(
-                    horizontal: isPhone ? 8 : 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                padding: EdgeInsets.symmetric(horizontal: isPhone ? 6 : 12, vertical: 6),
+                constraints: BoxConstraints(maxWidth: isPhone ? 72 : 220),
+                decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(20)),
                 alignment: Alignment.center,
-                child: Text(
-                  '⭐ $total · $rank',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.black, fontSize: isPhone ? 11 : 12),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: isPhone ? 11 : 12), maxLines: 1),
                 ),
               );
+              return isPhone
+                  ? Tooltip(message: '⭐ $total · $rank', child: chip)
+                  : chip;
             },
           ),
         ],
@@ -607,6 +791,7 @@ class LibraryPage extends StatelessWidget {
                         if (progress >= 1.0) stars = 3;
                         else if (xpRate >= 0.7 || progress >= 0.7) stars = 2;
                         else if (progress > 0) stars = 1;
+                        final hasBlueStar = di.sl<BookProgressRepository>().hasBlueStar(book.id);
                         return Row(
                           children: [
                             ...List.generate(3, (i) => Icon(
@@ -614,6 +799,13 @@ class LibraryPage extends StatelessWidget {
                                   size: 13,
                                   color: i < stars ? Colors.amber.shade700 : Colors.brown.shade300,
                                 )),
+                            if (hasBlueStar) ...[
+                              const SizedBox(width: 4),
+                              Tooltip(
+                                message: AppLocalizations.of(context).tr('blueStarEarned'),
+                                child: Icon(Icons.star, size: 14, color: Colors.blue.shade700),
+                              ),
+                            ],
                             const SizedBox(width: 4),
                             Flexible(child: Text('$xp XP', style: TextStyle(fontSize: 9, color: Colors.brown.shade600, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                           ],

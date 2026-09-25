@@ -1,0 +1,45 @@
+Elemental, querido Watson — Aventura narrativa de puzles
+
+Acompaña a Sherlock Holmes y al Dr. Watson en 6 casos autoconclusivos. Cada libro es una etapa y cada página termina con 1 acertijo. ¡Resuélvelo y gana experiencia (XP)!
+
+🔎 BIBLIOTECA DE 6 LIBROS
+• El Reloj Detenido de Nebelheim (30 págs) — la torre parada a las 10:10
+• El Faro de las Mareas Perdidas (10) — contrabando en pueblo pesquero
+• El Carnaval de las Máscaras (10) — robo en carnaval
+• La Estrella del Observatorio (10) — la noche del cometa Azul
+• El Misterio del Expreso de Medianoche (15) — desaparición en tren
+• La Abadía de los Susurros (15) — relicario entre monjes
+Total: 90 páginas + 18 secretos (101-118) + 6 deducciones finales.
+
+🧩 100+ ACERTIJOS
+Texto libre, opción múltiple y visuales dibujados (secuencias, balanzas, cofres, cerillas, mosaicos 2×2/3×3/4×4, relojes). 3 pistas progresivas por acertijo (-5 XP cada una). Dificultad auto (easy/med/hard) y bonificación contrarreloj +30%.
+
+🎧 AUDIOLIBRO C3
+Voz en español (e inglés), resaltado de palabra leída, resaltado de frase actual y pausa automática de 0,65 s entre frases. Pausa/reanuda/stop + duck de música.
+
+🎭 FINALES RAMIFICADOS
+4 finales por libro según % XP (perfect/good/half/low). Tras 2 fallos la historia se bifurca: Watson interviene y la siguiente página cambia (12 ramas 101-112). Epílogo secreto si completas 6/6 libros al 100%.
+
+📊 PROGRESIÓN Y ESTADÍSTICAS (D1)
+• Rangos: Aprendiz <300 · Investigador <800 · Watson <1500 · Holmes 1500+ (marco dorado)
+• Estrellas 1-3 por libro (progreso + XP)
+• 90 coleccionables + 18 secretos + 6 recompensas con imagen
+• Pantalla Estadísticas: tiempo medio/total, tasa acierto, libro más jugado, telemetría local (intentos, pistas, ramificaciones), colección y racha diaria
+• Reto diario + racha + postal del caso para compartir (share_plus) + export .elemental JSON
+• Guardado persistente, “Continuar partida” y “Nueva partida” con confirmación
+
+♿ ACCESIBILIDAD
+Alto contraste, fuente Normal/Grande/Extragrande (MediaQuery 1.0/1.3/1.6), tooltips y audiolibro tolerante a fallo (si no hay TTS, la app sigue).
+
+🌍 IDIOMA
+ES/EN completo (títulos, historias y acertijos; voz según idioma).
+
+🎵 BANDA SONORA
+Música ambiente en loop por libro (Nebelheim, faro-olas, carnaval, observatorio-coro, tren, abadía) con duck automático al TTS.
+
+Categoría Play Store: Puzzle > Aventura narrativa
+Etiquetas: sherlock holmes, watson, puzles lógicos, acertijos, aventura narrativa, detective, layton-like, libros interactivos, audiolibro
+
+Sin anuncios. Sin permisos invasivos. Solo progreso local.
+
+¿Listo para que Holmes diga “Es elemental”?

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../puzzle/domain/entities/puzzle.dart';
 import 'visual_puzzle_widget.dart';
+import 'map_exclusive_visual_widget.dart';
 
 /// Tarjeta del acertijo al final de cada página del libro.
 class PuzzleCard extends StatefulWidget {
@@ -11,6 +13,9 @@ class PuzzleCard extends StatefulWidget {
   final int failedAttempts;
   final void Function(String answer, int hintsUsed) onSubmit;
   final double textScale;
+  /// Cuando es true, la recompensa es una estrella azul (sin XP):
+  /// se oculta el chip "+XP" y los mensajes de ganancia de XP.
+  final bool blueStarReward;
 
   const PuzzleCard({
     super.key,
@@ -20,6 +25,7 @@ class PuzzleCard extends StatefulWidget {
     required this.failedAttempts,
     required this.onSubmit,
     this.textScale = 1.0,
+    this.blueStarReward = false,
   });
 
   @override
@@ -28,12 +34,30 @@ class PuzzleCard extends StatefulWidget {
 
 class _PuzzleCardState extends State<PuzzleCard> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   String? _selectedOption;
   int _hintLevel = 0; // 0 = sin pista, 1..3 = nivel mostrado
   bool get _showHint => _hintLevel > 0;
 
+  DateTime? _lastSubmitAt;
+
+  void _submitTextAnswer() {
+    if (widget.isSolved) return;
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    // Debounce: evita triple disparo (onKey + onSubmitted + onEditingComplete) y spam rápido
+    final now = DateTime.now();
+    if (_lastSubmitAt != null && now.difference(_lastSubmitAt!).inMilliseconds < 600) {
+      return;
+    }
+    _lastSubmitAt = now;
+    _focusNode.unfocus();
+    widget.onSubmit(text, _hintLevel);
+  }
+
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -48,9 +72,14 @@ class _PuzzleCardState extends State<PuzzleCard> {
     }
     if (widget.isSolved) _hintLevel = 0;
     if (!widget.isSolved && widget.failedAttempts > oldWidget.failedAttempts) {
-      if (widget.failedAttempts == 1) _hintLevel = 1;
-      if (widget.failedAttempts == 2) _hintLevel = 2;
+      final maxLevel = widget.puzzle.allHints.length.clamp(1, 3);
+      _hintLevel = widget.failedAttempts.clamp(1, maxLevel);
     }
+  }
+
+  bool _isMapExclusiveKind(String kind) {
+    const exclusive = {'cat_footprints', 'moon_phases', 'memory_runes', 'river_pipes', 'shadow_match', 'wind_compass', 'village_wheel', 'tower_gears'};
+    return exclusive.contains(kind);
   }
 
   @override
@@ -95,15 +124,36 @@ class _PuzzleCardState extends State<PuzzleCard> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade200,
+                  color: widget.blueStarReward
+                      ? Colors.blue.shade100
+                      : Colors.amber.shade200,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.brown),
+                  border: Border.all(
+                      color: widget.blueStarReward
+                          ? Colors.blue.shade700
+                          : Colors.brown),
                 ),
-                child: Text(
-                  '${p.experiencia} ${AppLocalizations.of(context).tr('xp')}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 12),
-                ),
+                child: widget.blueStarReward
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star,
+                              size: 14, color: Colors.blue.shade700),
+                          const SizedBox(width: 4),
+                          Text(
+                            AppLocalizations.of(context).tr('blueStar'),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: Colors.blue.shade900),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        '${p.experiencia} ${AppLocalizations.of(context).tr('xp')}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
               ),
             ],
           ),
@@ -113,8 +163,10 @@ class _PuzzleCardState extends State<PuzzleCard> {
                   fontSize: 15 * widget.textScale,
                   color: Colors.black87)),
           if (p.visualKind != null)
-            VisualPuzzleWidget(
-                visualKind: p.visualKind, visualPayload: p.visualPayload),
+            // Solo uno renderiza: MapExclusive para kinds nuevos, clásico para el resto — evita doble frame
+            _isMapExclusiveKind(p.visualKind!)
+                ? MapExclusiveVisualWidget(visualKind: p.visualKind, visualPayload: p.visualPayload)
+                : VisualPuzzleWidget(visualKind: p.visualKind, visualPayload: p.visualPayload),
           const SizedBox(height: 12),
           if (!widget.isSolved)
             Container(
@@ -127,13 +179,27 @@ class _PuzzleCardState extends State<PuzzleCard> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.emoji_events, size: 18, color: Colors.brown),
+                  Icon(
+                      widget.blueStarReward
+                          ? Icons.star
+                          : Icons.emoji_events,
+                      size: 18,
+                      color: widget.blueStarReward
+                          ? Colors.blue.shade700
+                          : Colors.brown),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context).tr('dareAndGain', {'xp': '${p.experiencia}'}),
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold, color: Colors.brown),
+                      widget.blueStarReward
+                          ? AppLocalizations.of(context).tr('blueStarHint')
+                          : AppLocalizations.of(context).tr(
+                              'dareAndGain', {'xp': '${p.experiencia}'}),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: widget.blueStarReward
+                              ? Colors.blue.shade900
+                              : Colors.brown),
                     ),
                   ),
                 ],
@@ -199,18 +265,33 @@ class _PuzzleCardState extends State<PuzzleCard> {
             ]
           else
             ...[
-              TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).tr('writeAnswer'),
-                  border: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Colors.brown, width: 2)),
-                ),
-                onSubmitted: (v) {
-                  if (v.trim().isNotEmpty) widget.onSubmit(v, _hintLevel);
+              // Intro del teclado (soft + hardware) dispara responder — C3/D1 fix
+              Focus(
+                onKeyEvent: (node, event) {
+                  if (event is KeyDownEvent &&
+                      (event.logicalKey == LogicalKeyboardKey.enter ||
+                          event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+                    _submitTextAnswer();
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
                 },
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  textInputAction: TextInputAction.done,
+                  keyboardType: TextInputType.text,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).tr('writeAnswer'),
+                    border: const OutlineInputBorder(),
+                    focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.brown, width: 2)),
+                  ),
+                  onSubmitted: (_) => _submitTextAnswer(),
+                  onEditingComplete: _submitTextAnswer,
+                ),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
@@ -219,11 +300,7 @@ class _PuzzleCardState extends State<PuzzleCard> {
                   foregroundColor: Colors.amber,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                onPressed: () {
-                  if (_controller.text.trim().isNotEmpty) {
-                    widget.onSubmit(_controller.text, _hintLevel);
-                  }
-                },
+                onPressed: () => _submitTextAnswer(),
                 child: Text(AppLocalizations.of(context).tr('answer'),
                     style:
                         TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
@@ -263,9 +340,13 @@ class _PuzzleCardState extends State<PuzzleCard> {
                               ? (AppLocalizations.of(context).locale.languageCode == 'en'
                                   ? 'Hint 1/3 (-5 XP if you solve now)'
                                   : 'Pista 1/3 (-5 XP si aciertas ahora)')
-                              : (AppLocalizations.of(context).locale.languageCode == 'en'
-                                  ? 'Hint 2/3 (-10 XP) — next failure changes the story.'
-                                  : 'Pista 2/3 (-10 XP) — el siguiente fallo cambia la historia.'),
+                              : _hintLevel == 2
+                                  ? (AppLocalizations.of(context).locale.languageCode == 'en'
+                                      ? 'Hint 2/3 (-10 XP) — next failure changes the story branch.'
+                                      : 'Pista 2/3 (-10 XP) — el siguiente fallo cambia la rama de la historia.')
+                                  : (AppLocalizations.of(context).locale.languageCode == 'en'
+                                      ? 'Hint 3/3 (-15 XP) — story branched! Next page will be different.'
+                                      : 'Pista 3/3 (-15 XP) — ¡historia ramificada! La historia será diferente.'),
                           style: const TextStyle(color: Colors.white70, fontSize: 11),
                         ),
                       ],

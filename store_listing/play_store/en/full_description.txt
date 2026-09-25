@@ -1,0 +1,45 @@
+Elementary, my dear Watson — Narrative Puzzle Adventure
+
+Join Sherlock Holmes and Dr. Watson across 6 standalone cases. Each book is a stage and each page ends with 1 puzzle. Solve it and earn XP!
+
+🔎 6-BOOK LIBRARY
+• The Stopped Clock of Nebelheim (30 pp) — tower stuck at 10:10
+• The Lighthouse of Lost Tides (10) — smuggling in a fishing village
+• The Carnival of Masks (10) — heist at carnival
+• The Star of the Observatory (10) — night of the Blue Comet
+• The Mystery of the Midnight Express (15) — vanishing on a night train
+• The Abbey of Whispers (15) — stolen reliquary among monks
+Total: 90 pages + 18 secrets (101-118) + 6 final deductions.
+
+🧩 100+ PUZZLES
+Free text, multiple choice and visual widgets (sequences, scales, chests, matchsticks, mosaics 2×2/3×3/4×4, dials). 3 progressive hints each (-5 XP). Auto difficulty (easy/med/hard) + timed bonus +30%.
+
+🎧 AUDIOBOOK C3
+Voice in English/Spanish, word highlight, sentence highlight (current sentence amber), auto 0.65 s pause per sentence. Pause/resume/stop + music ducking.
+
+🎭 BRANCHING ENDINGS
+4 endings per book by % XP (perfect/good/half/low). After 2 fails Watson steps in and the next page branches (12 branches 101-112). Secret epilogue if all 6 books 100%.
+
+📊 PROGRESSION & STATS (D1)
+• Ranks: Apprentice <300 · Investigator <800 · Watson <1500 · Holmes 1500+ (golden frame)
+• 1-3 stars per book (progress + XP)
+• 90 collectibles + 18 secrets + 6 image rewards
+• Stats screen: avg/total time, success rate, most played book, local telemetry (attempts, hints, branches), collection & daily streak
+• Daily puzzle + streak + shareable case postal + .elemental JSON export
+• Persistent save, Continue/New game with confirmation
+
+♿ ACCESSIBILITY
+High contrast, font Normal/Large/Extra-large (MediaQuery 1.0/1.3/1.6), tooltips, TTS fails gracefully.
+
+🌍 LANGUAGE
+Full ES/EN (titles, stories, puzzles; voice follows locale).
+
+🎵 SOUNDTRACK
+Ambient loop per book (Nebelheim, lighthouse-waves, carnival, observatory-choir, train, abbey) with auto duck on TTS.
+
+Play Store category: Puzzle > Narrative Adventure
+Tags: sherlock holmes, watson, logic puzzles, riddles, narrative adventure, detective, layton-like, interactive books, audiobook
+
+No ads. No invasive permissions. Local progress only.
+
+Ready for Holmes to say “Elementary”?

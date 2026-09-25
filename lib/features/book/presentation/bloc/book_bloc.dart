@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/services/locale_service.dart';
+import '../../../../core/services/reading_mode_service.dart';
 import '../../data/datasources/book_local_data_source.dart';
 import '../../data/repositories/book_progress_repository.dart';
 import '../../domain/entities/book_page.dart';
@@ -20,6 +21,10 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       emit(const BookLoading());
       try {
         final book = await dataSource.getBook(event.bookId);
+        if (book.pages.isEmpty) {
+          emit(const BookError('Libro vacío.'));
+          return;
+        }
         final start = event.initialPage.clamp(0, book.pages.length - 1);
         final solved = progress.solvedFor(book.id);
         // Navegación libre: se respeta la última posición guardada,
@@ -42,6 +47,8 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       final s = state;
       if (s is BookLoaded) {
         if (event.pageIndex < 0 || event.pageIndex >= s.pages.length) return;
+        // Modo exigente: no se puede saltar más allá del primer acertijo sin resolver.
+        if (_isStrict() && event.pageIndex > _firstUnsolvedIndex(s)) return;
         // Navegación libre: cualquier página es accesible.
         await progress.saveLastPosition(
             bookId: s.book.id, pageIndex: event.pageIndex);
@@ -57,6 +64,8 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       final s = state;
       if (s is BookLoaded) {
         if (!s.canGoNext) return;
+        // Modo exigente: hasta acertar la página actual no se puede pasar.
+        if (_isStrict() && !s.isCurrentSolved) return;
         final nextIdx = s.currentIndex + 1;
         List<BookPage> pages = s.pages;
         final wasBranched = s.branchedPuzzleIds.contains(s.currentPage.puzzle.id);
@@ -109,9 +118,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         if (s.isBlockedByAttempts) return;
         final puzzle = s.currentPage.puzzle;
         final isCorrect = puzzle.checkAnswer(event.answer);
+        // D1: registrar telemetría de cada intento
+        await progress.recordAttempt(puzzleId: puzzle.id, success: isCorrect, hintsUsed: event.hintsUsed, seconds: 0);
         if (isCorrect) {
           // A1: penalización -5 XP por pista usada (mín 1 XP) + A2 bonus tiempo +30%
-          final penalty = (event.hintsUsed * 5).clamp(0, puzzle.experiencia - 1);
+          final maxPenalty = (puzzle.experiencia - 1).clamp(0, 999);
+          final penalty = (event.hintsUsed * 5).clamp(0, maxPenalty);
           var awarded = (puzzle.experiencia - penalty).clamp(1, 999);
           if (event.timedBonus) awarded = (awarded * 1.3).round().clamp(1, 999);
           // Si es puzzle ramificado 101-112, también cuenta como secreto 18
@@ -133,11 +145,14 @@ class BookBloc extends Bloc<BookEvent, BookState> {
           ));
         } else {
           final nextFailed = s.failedAttemptsOnPage + 1;
-          final isSecondFail = nextFailed == 2;
-          final newBranched = isSecondFail ? {...s.branchedPuzzleIds, puzzle.id} : s.branchedPuzzleIds;
+          final isThirdFail = nextFailed == 3;
+          final newBranched = isThirdFail ? {...s.branchedPuzzleIds, puzzle.id} : s.branchedPuzzleIds;
+          if (isThirdFail) {
+            await progress.recordBranch(puzzle.id, 'alt');
+          }
           emit(s.copyWith(
             lastAnswerCorrect: () => false,
-            failedAttemptsOnPage: nextFailed,
+            failedAttemptsOnPage: nextFailed.clamp(0, 3),
             branchedPuzzleIds: newBranched,
           ));
         }
@@ -165,6 +180,24 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         ));
       }
     });
+  }
+
+  /// Modo exigente activo (lectura con avance bloqueado hasta acertar).
+  /// Fail-open: si el servicio no está disponible, se permite navegar.
+  bool _isStrict() {
+    try {
+      return GetIt.I.get<ReadingModeService>().isStrict;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Primera página con acertijo sin resolver (o última si todo está resuelto).
+  /// En modo exigente es el límite de avance: se puede estar en ella, pero no pasarla.
+  int _firstUnsolvedIndex(BookLoaded s) {
+    final idx = s.pages.indexWhere(
+        (p) => !s.solvedPuzzleIds.contains(p.puzzle.id));
+    return idx == -1 ? s.pages.length - 1 : idx;
   }
 
   String _branchIdFor(String failedId) {

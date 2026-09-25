@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/services/locale_service.dart';
 
 /// Dibuja la parte visual de los 6 acertijos visuales del libro.
 /// Todo con widgets básicos (sin assets) para que funcione en cualquier plataforma.
@@ -18,7 +20,7 @@ class VisualPuzzleWidget extends StatelessWidget {
         return _shapesSequence(
             _shapesFromPayload(visualPayload, const ['●', '●', '▲', '●']));
       case 'chests':
-        return _chests();
+        return _chests(visualPayload);
       case 'matchsticks':
         return _matchsticks();
       case 'coin_triangle':
@@ -85,12 +87,23 @@ class VisualPuzzleWidget extends StatelessWidget {
     );
   }
 
-  Widget _chests() {
-    final chests = [
-      {'color': Colors.red.shade700, 'label': 'ROJO'},
-      {'color': Colors.blue.shade700, 'label': 'AZUL'},
-      {'color': Colors.green.shade700, 'label': 'VERDE'},
-    ];
+  Widget _chests([String? payload]) {
+    final isEn = () {
+      try { return GetIt.I.get<LocaleService>().value.languageCode == 'en'; } catch (_) { return false; }
+    }();
+    // Si payload viene con red/blue/green, respeta idioma; fallback al locale
+    final useEn = payload != null && payload.toLowerCase().contains('red') ? true : payload != null && payload.toLowerCase().contains('rojo') ? false : isEn;
+    final chests = useEn
+        ? [
+            {'color': Colors.red.shade700, 'label': 'RED'},
+            {'color': Colors.blue.shade700, 'label': 'BLUE'},
+            {'color': Colors.green.shade700, 'label': 'GREEN'},
+          ]
+        : [
+            {'color': Colors.red.shade700, 'label': 'ROJO'},
+            {'color': Colors.blue.shade700, 'label': 'AZUL'},
+            {'color': Colors.green.shade700, 'label': 'VERDE'},
+          ];
     return _frame(
       Wrap(
         alignment: WrapAlignment.spaceEvenly,

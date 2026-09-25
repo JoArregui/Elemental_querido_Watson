@@ -1,8 +1,9 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 
-/// Banda sonora por libro — 6 ambientes loop (assets/audio/*.wav) con duck al TTS.
-class AudioService {
+  /// Banda sonora por libro — 6 ambientes loop (assets/audio/*) con duck al TTS.
+  /// nebelheim ahora .mp3, resto .wav
+  class AudioService {
   final AudioPlayer _player = AudioPlayer();
   String? _currentBook;
   bool _ready = false;
@@ -19,7 +20,7 @@ class AudioService {
   }
 
   static const _map = {
-    'nebelheim': 'audio/nebelheim.wav',
+    'nebelheim': 'audio/nebelheim.mp3',
     'lighthouse': 'audio/lighthouse.wav',
     'carnival': 'audio/carnival.wav',
     'observatory': 'audio/observatory.wav',

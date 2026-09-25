@@ -6,6 +6,7 @@ import 'core/services/accessibility_service.dart';
 import 'core/services/audio_service.dart';
 import 'core/services/feedback_service.dart';
 import 'core/services/locale_service.dart';
+import 'core/services/reading_mode_service.dart';
 import 'core/services/sync_service.dart';
 import 'features/book/data/services/tts_service.dart';
 import 'features/book/presentation/bloc/book_bloc.dart';
@@ -63,6 +64,9 @@ Future<void> init() async {
   final a11y = AccessibilityService();
   await a11y.init();
   sl.registerSingleton<AccessibilityService>(a11y);
+  final readingMode = ReadingModeService();
+  await readingMode.init();
+  sl.registerSingleton<ReadingModeService>(readingMode);
 
   // Data sources
   sl.registerLazySingleton<PuzzleLocalDataSource>(
