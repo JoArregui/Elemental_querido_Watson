@@ -17,6 +17,12 @@ class ReadingModeService extends ValueNotifier<bool> {
     value = prefs.getBool(_key) ?? false;
   }
 
+  /// Relee el modo guardado (tras importar un .elemental).
+  Future<void> reload() async {
+    await init();
+    notifyListeners();
+  }
+
   Future<void> setStrict(bool strict) async {
     value = strict;
     notifyListeners();

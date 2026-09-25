@@ -17,6 +17,12 @@ class AccessibilityService extends ValueNotifier<bool> {
     _fontScale = prefs.getDouble(_fontKey) ?? 1.0;
   }
 
+  /// Relee los ajustes guardados (tras importar un .elemental).
+  Future<void> reload() async {
+    await init();
+    notifyListeners();
+  }
+
   Future<void> toggleHighContrast() async {
     value = !value;
     notifyListeners();

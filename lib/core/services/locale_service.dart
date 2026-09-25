@@ -15,6 +15,12 @@ class LocaleService extends ValueNotifier<Locale> {
     }
   }
 
+  /// Relee el idioma guardado (tras importar un .elemental).
+  Future<void> reload() async {
+    await init();
+    notifyListeners();
+  }
+
   Future<void> setLocale(Locale locale) async {
     if (!['es', 'en'].contains(locale.languageCode)) return;
     value = locale;

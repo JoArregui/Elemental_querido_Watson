@@ -45,7 +45,7 @@ class AlleyPuzzles {
               ? ['Order is new→crescent→quarter→gibbous→full.', 'The gap is the third night.', '🌓 — exclusive.']
               : ['Orden: nueva→creciente→cuarto→gibosa→llena.', 'El hueco es la tercera noche.', '🌓 — exclusivo.'],
           type: PuzzleType.visualChoice,
-          options: ['🌕', '🌑', '🌘', '🌗'],
+          options: ['🌕', '🌑', '🌓', '🌗'],
           visualKind: 'moon_phases',
           visualPayload: 'moon_phases',
         );
@@ -169,4 +169,29 @@ class AlleyPuzzles {
 
   static List<PuzzleModel> allForLocale(bool isEn) =>
       List.generate(8, (i) => getForAlley(i + 1, isEn));
+
+  /// Camino alternativo del callejón: tras 3 fallos Watson reduce las
+  /// opciones a 2 (un distractor + la correcta) para poder seguir intentando.
+  /// Mismo id para no duplicar progreso; misma respuesta correcta.
+  static PuzzleModel branchForAlley(int alley, bool isEn) {
+    final base = getForAlley(alley, isEn);
+    final correct = base.correctAnswer.trim().toLowerCase();
+    final wrong = base.options.firstWhere(
+      (o) => o.trim().toLowerCase() != correct,
+      orElse: () => base.options.first,
+    );
+    return PuzzleModel(
+      id: base.id,
+      title: base.title,
+      statement: base.statement,
+      experiencia: base.experiencia,
+      correctAnswer: base.correctAnswer,
+      hintText: base.hintText,
+      hints: base.hints,
+      type: base.type,
+      options: [wrong, base.correctAnswer],
+      visualKind: base.visualKind,
+      visualPayload: base.visualPayload,
+    );
+  }
 }

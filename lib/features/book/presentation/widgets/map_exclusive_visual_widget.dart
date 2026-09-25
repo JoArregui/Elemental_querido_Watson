@@ -180,16 +180,16 @@ class MapExclusiveVisualWidget extends StatelessWidget {
     );
   }
 
-  // 5 — Sombras: referencia + 4 candidatas numeradas. Solo la 2 es idéntica
-  // (1 espejada, 3 más grande y clara, 4 ladeada).
+  // 5 — Sombras: gato de referencia + 4 sombras de gato numeradas.
+  // Solo la 2 es idéntica (1 espejada, 3 más grande y clara, 4 ladeada).
   Widget _shadowMatch() {
     Widget candidate(int n, Widget cat) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 56,
-            height: 56,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(8),
@@ -211,18 +211,22 @@ class MapExclusiveVisualWidget extends StatelessWidget {
       );
     }
 
-    const refCat = Icon(Icons.pets, size: 32, color: Colors.white);
+    Widget shadowCat(Color color, double size) => CustomPaint(
+        size: Size(size, size),
+        painter: _CatSilhouettePainter(color));
+    final refCat = shadowCat(Colors.black, 52);
+    final darkCat = shadowCat(const Color(0xFF212121), 52);
     return Column(
       children: [
         const Text('Sombra del Gato', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12)),
         const SizedBox(height: 10),
         Container(
-            width: 60,
-            height: 60,
+            width: 68,
+            height: 68,
             decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.pets, size: 32, color: Colors.black)),
+            child: Center(child: refCat)),
         const Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
             child: Text('↓',
@@ -237,17 +241,14 @@ class MapExclusiveVisualWidget extends StatelessWidget {
                 Transform(
                     alignment: Alignment.center,
                     transform: Matrix4.diagonal3Values(-1, 1, 1),
-                    child: refCat)),
-            candidate(2, refCat),
-            candidate(
-                3,
-                const Icon(Icons.pets,
-                    size: 40, color: Color(0xFF9E9E9E))),
+                    child: darkCat)),
+            candidate(2, darkCat),
+            candidate(3, shadowCat(const Color(0xFF9E9E9E), 60)),
             candidate(
                 4,
-                const RotationTransition(
-                    turns: AlwaysStoppedAnimation(0.04),
-                    child: refCat)),
+                RotationTransition(
+                    turns: const AlwaysStoppedAnimation(0.05),
+                    child: darkCat)),
           ],
         ),
         const SizedBox(height: 8),
@@ -441,4 +442,69 @@ class _PipesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Silueta de gato sentado de perfil: cola curva, lomo, patas,
+/// cabeza con dos orejas triangulares. Espacio de dibujo 60x60.
+class _CatSilhouettePainter extends CustomPainter {
+  final Color color;
+  const _CatSilhouettePainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width / 60;
+    final fill = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    // Cola: curva gruesa a la derecha.
+    final tail = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5 * s
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(
+        Path()
+          ..moveTo(44 * s, 42 * s)
+          ..quadraticBezierTo(58 * s, 32 * s, 53 * s, 12 * s),
+        tail);
+    // Lomo.
+    canvas.drawOval(
+        Rect.fromCenter(
+            center: Offset(28 * s, 42 * s),
+            width: 28 * s,
+            height: 18 * s),
+        fill);
+    // Patas delanteras.
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(20 * s, 47 * s, 5 * s, 10 * s),
+            Radius.circular(2 * s)),
+        fill);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(31 * s, 47 * s, 5 * s, 10 * s),
+            Radius.circular(2 * s)),
+        fill);
+    // Cabeza.
+    canvas.drawCircle(Offset(42 * s, 26 * s), 8.5 * s, fill);
+    // Orejas triangulares.
+    canvas.drawPath(
+        Path()
+          ..moveTo(35 * s, 21 * s)
+          ..lineTo(37 * s, 10 * s)
+          ..lineTo(43 * s, 18 * s)
+          ..close(),
+        fill);
+    canvas.drawPath(
+        Path()
+          ..moveTo(43 * s, 18 * s)
+          ..lineTo(49 * s, 10 * s)
+          ..lineTo(49.5 * s, 21 * s)
+          ..close(),
+        fill);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CatSilhouettePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

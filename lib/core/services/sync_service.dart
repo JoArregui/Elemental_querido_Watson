@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,9 +50,4 @@ class SyncService {
     await Share.shareXFiles([file], text: 'Mi partida Elemental, querido Watson — .elemental');
   }
 
-  Future<void> copyDailyLink() async {
-    final today = DateTime.now().toIso8601String().split('T').first;
-    final link = 'elemental://daily/$today';
-    await Clipboard.setData(ClipboardData(text: link));
-  }
 }

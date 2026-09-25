@@ -27,6 +27,25 @@ class BookProgressRepository {
   int _lastPageIndex = 0;
   bool _ready = false;
 
+  /// Recarga la partida desde el dispositivo (tras importar un .elemental).
+  Future<void> reload() async {
+    _solvedByBook.clear();
+    _experienciaByBook.clear();
+    _collectibles.clear();
+    _secrets.clear();
+    _blueStars.clear();
+    _branchChoices.clear();
+    _timePerPuzzle.clear();
+    _attemptsPerPuzzle.clear();
+    _successPerPuzzle.clear();
+    _hintsPerPuzzle.clear();
+    _totalSessions = 0;
+    _lastBookId = null;
+    _lastPageIndex = 0;
+    _ready = false;
+    await init();
+  }
+
   /// Carga la partida guardada (si existe). Llamar una vez al arrancar.
   Future<void> init() async {
     if (_ready) return;

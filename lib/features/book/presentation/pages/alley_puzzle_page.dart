@@ -23,6 +23,7 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
   bool _isSolved = false;
   bool? _lastCorrect;
   int _failedAttempts = 0;
+  bool _branched = false; // camino alternativo: 2 opciones tras 3 fallos
   bool _showCelebration = false;
   String? _lastLocale;
   bool _initialized = false;
@@ -59,11 +60,11 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
 
   Future<void> _onSubmit(String answer, int hintsUsed) async {
     if (_isSolved) return;
-    if (_failedAttempts >= 3) return; // bloqueado tras 3 fallos — rama cambiada
     final repo = di.sl<BookProgressRepository>();
     final ok = _puzzle.checkAnswer(answer);
     // Capturar l10n antes de awaits para evitar use_build_context_synchronously
     final l10nBefore = AppLocalizations.of(context);
+    final localeBefore = l10nBefore.locale.languageCode;
     await repo.recordAttempt(puzzleId: _puzzle.id, success: ok, hintsUsed: hintsUsed);
     if (!mounted) return;
     if (ok) {
@@ -99,21 +100,29 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
       });
     } else {
       final next = (_failedAttempts + 1).clamp(0, 3);
-      final isThirdFail = next == 3;
-      if (isThirdFail) {
+      final triggersBranch = next == 3 && !_branched;
+      if (triggersBranch) {
         await repo.recordBranch(_puzzle.id, 'alt');
       }
       setState(() {
         _lastCorrect = false;
         _failedAttempts = next;
+        // Rama real: Watson reduce las opciones a 2 y se puede seguir intentando.
+        if (triggersBranch) {
+          _puzzle = AlleyPuzzles.branchForAlley(
+              widget.alleyIndex, localeBefore == 'en');
+          _branched = true;
+        }
       });
-      if (isThirdFail && mounted) {
+      if (triggersBranch && mounted) {
         final isEn = AppLocalizations.of(context).locale.languageCode == 'en';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.brown.shade800,
             content: Text(
-              isEn ? 'Story branched! This alley reveals an alternative path.' : '¡Rama cambiada! Este callejón revela un camino alternativo.',
+              isEn
+                  ? 'Alternative path! Watson narrows it down to 2 options — keep trying!'
+                  : '¡Camino alternativo! Watson lo reduce a 2 opciones — ¡sigue intentando!',
               style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
             ),
             duration: const Duration(seconds: 3),
@@ -261,7 +270,7 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                         label: Text(isEn ? 'Back to map' : 'Volver al mapa', style: const TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () => Navigator.pop(context, true),
                       )
-                    else if (_failedAttempts >= 3)
+                    else if (_branched)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -271,13 +280,13 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                             child: Row(children: [
                               const Icon(Icons.alt_route, color: Colors.amber),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(isEn ? 'Branch changed — no more attempts. Return to map to try another alley.' : 'Rama cambiada — sin más intentos. Vuelve al mapa y prueba otro callejón.', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12))),
+                              Expanded(child: Text(isEn ? 'Alternative path — 2 options left. You can keep trying above.' : 'Camino alternativo — quedan 2 opciones. Puedes seguir intentando arriba.', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12))),
                             ]),
                           ),
                           const SizedBox(height: 8),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.brown.shade700, foregroundColor: Colors.amber, padding: const EdgeInsets.symmetric(vertical: 14)),
-                            icon: const Icon(Icons.map),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(foregroundColor: Colors.amber, side: const BorderSide(color: Colors.amber)),
+                            icon: const Icon(Icons.map, size: 18),
                             label: Text(isEn ? 'Back to map' : 'Volver al mapa', style: const TextStyle(fontWeight: FontWeight.bold)),
                             onPressed: () => Navigator.pop(context, false),
                           ),
