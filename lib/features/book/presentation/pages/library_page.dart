@@ -146,7 +146,7 @@ class LibraryPage extends StatelessWidget {
             // — Recompensas con imagen —
             Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Rewards (images)' : 'Recompensas (imágenes)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
             const SizedBox(height: 6),
-            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.88), itemCount: rewardData.length, itemBuilder: (_, i) {
+            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.68), itemCount: rewardData.length, itemBuilder: (_, i) {
               final r = rewardData[i];
               final unlocked = rewards.contains(r['id']);
               final holmesFrame = isHolmes && unlocked;
@@ -418,7 +418,7 @@ class LibraryPage extends StatelessWidget {
                     ),
                     const Divider(),
                     // Compartir postal — operativo: share_plus con texto real del progreso
-                    ListTile(leading: const Icon(Icons.share, color: Colors.brown), title: Text(l10n.locale.languageCode == 'en' ? 'Share case postal' : 'Compartir postal del caso', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'Rank + XP + collection via share' : 'Rango + XP + colección vía compartir', style: const TextStyle(fontSize: 11)), onTap: () async { Navigator.pop(c); await sync.sharePostal(progress, daily, l10n.locale.languageCode); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Postal shared!':'¡Postal compartida!'))); }),
+                    ListTile(leading: const Icon(Icons.share, color: Colors.brown), title: Text(l10n.locale.languageCode == 'en' ? 'Share case postal' : 'Compartir postal del caso', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'Front-and-back image postcard to share' : 'Postal con anverso y reverso para compartir', style: const TextStyle(fontSize: 11)), onTap: () async { Navigator.pop(c); await sync.sharePostal(progress, daily, l10n.locale.languageCode); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Postal shared!':'¡Postal compartida!'))); }),
                     // Exportar .elemental — operativo: JSON + ShareXFiles
                     ListTile(leading: const Icon(Icons.save_alt, color: Colors.brown), title: Text(l10n.locale.languageCode == 'en' ? 'Export .elemental' : 'Exportar .elemental', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)), subtitle: Text(l10n.locale.languageCode == 'en' ? 'JSON with all progress · share file' : 'JSON con todo el progreso · compartir archivo', style: const TextStyle(fontSize: 11)), onTap: () async { Navigator.pop(c); await sync.shareExport(); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.locale.languageCode=='en'?'Exported .elemental':'Exportado .elemental'))); }),
                   ])),
