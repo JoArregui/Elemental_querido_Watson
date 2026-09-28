@@ -275,6 +275,10 @@ class BookProgressRepository {
     _blueStars.clear();
     _branchChoices.clear();
     _timePerPuzzle.clear();
+    _attemptsPerPuzzle.clear();
+    _successPerPuzzle.clear();
+    _hintsPerPuzzle.clear();
+    _totalSessions = 0;
     _lastBookId = null;
     _lastPageIndex = 0;
     final prefs = await SharedPreferences.getInstance();
@@ -287,7 +291,11 @@ class BookProgressRepository {
            key == 'secrets_solved' ||
            key == 'blue_stars' ||
            key == 'branchChoices' ||
-          key == 'timePerPuzzle') {
+          key == 'timePerPuzzle' ||
+          key == 'stats_attempts' ||
+          key == 'stats_success' ||
+          key == 'stats_hints' ||
+          key == 'stats_sessions') {
         await prefs.remove(key);
       }
     }

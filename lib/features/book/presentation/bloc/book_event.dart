@@ -34,9 +34,10 @@ class SubmitPageAnswerEvent extends BookEvent {
   final String answer;
   final int hintsUsed; // A1: 0..3, penaliza -5 por pista
   final bool timedBonus; // A2: bonus +30% si resuelve rápido
-  const SubmitPageAnswerEvent(this.answer, {this.hintsUsed = 0, this.timedBonus = false});
+  final int elapsedSeconds; // D1: tiempo real en la página, alimenta "tiempo medio"
+  const SubmitPageAnswerEvent(this.answer, {this.hintsUsed = 0, this.timedBonus = false, this.elapsedSeconds = 0});
   @override
-  List<Object?> get props => [answer, hintsUsed, timedBonus];
+  List<Object?> get props => [answer, hintsUsed, timedBonus, elapsedSeconds];
 }
 
 class ClearPageResultEvent extends BookEvent {

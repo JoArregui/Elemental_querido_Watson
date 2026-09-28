@@ -46,11 +46,14 @@ class _BookReaderPageState extends State<BookReaderPage> {
   StreamSubscription? _ttsSentenceSub;
   // Clave del último acertijo final ya celebrado con la finish_page (evita reabrirla).
   String? _finishShownKey;
+  // D1: inicio de la página actual para medir el tiempo medio por puzzle.
+  DateTime _pageStartTime = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.96);
+    _pageStartTime = DateTime.now();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       di.sl<AudioService>().playForBook(widget.bookId);
     });
@@ -310,10 +313,17 @@ class _BookReaderPageState extends State<BookReaderPage> {
   }
 
   /// Primera página con acertijo sin resolver (límite de avance en modo exigente).
+  /// Las páginas ramificadas por 3 fallos no bloquean: sus puntos se
+  /// perdieron pero la historia continúa.
   int _firstUnsolvedIndex(BookLoaded state) {
-    final idx = state.pages.indexWhere(
+    var idx = state.pages.indexWhere(
         (p) => !state.solvedPuzzleIds.contains(p.puzzle.id));
-    return idx == -1 ? state.pages.length - 1 : idx;
+    if (idx == -1) return state.pages.length - 1;
+    while (idx < state.pages.length &&
+        state.branchedPuzzleIds.contains(state.pages[idx].puzzle.id)) {
+      idx++;
+    }
+    return idx >= state.pages.length ? state.pages.length - 1 : idx;
   }
 
   /// En modo exigente, las páginas más allá del primer acertijo sin resolver están bloqueadas.
@@ -416,6 +426,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
     showModalBottomSheet(
       context: parentContext,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       backgroundColor: const Color(0xFFFFF3CD),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -533,6 +545,63 @@ class _BookReaderPageState extends State<BookReaderPage> {
           ),
         ),
         const SizedBox(height: 10),
+        // Tu versión de la historia: con 12 puntos de rama no hay dos
+        // partidas iguales. Se listan los desvíos tomados en este libro.
+        Builder(builder: (ctx) {
+          final locale =
+              AppLocalizations.of(ctx).locale.languageCode;
+          final isEn = locale == 'en';
+          final repo = di.sl<BookProgressRepository>();
+          final took = state.pages
+              .where((p) => repo.branchChoices.containsKey(p.puzzle.id))
+              .map((p) =>
+                  BookBloc.branchTitleFor(p.puzzle.id, locale) ??
+                  p.puzzle.id)
+              .toList();
+          return Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: took.isEmpty
+                  ? Colors.green.shade50
+                  : Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                  color: took.isEmpty
+                      ? Colors.green.shade300
+                      : Colors.purple.shade300,
+                  width: 2),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.alt_route,
+                    size: 20,
+                    color: took.isEmpty
+                        ? Colors.green.shade700
+                        : Colors.purple.shade700),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    took.isEmpty
+                        ? (isEn
+                            ? 'Your version: straight story — no two playthroughs are alike when you branch!'
+                            : 'Tu versión: historia lineal — ¡no hay dos partidas iguales cuando ramificas!')
+                        : (isEn
+                            ? 'Your version: ${took.length} detour(s) — ${took.join(', ')}'
+                            : 'Tu versión: ${took.length} desvío(s) — ${took.join(', ')}'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.brown),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 10),
         // Estrella azul del Acertijo Final (sin XP): se muestra ganada o pendiente.
         Builder(builder: (ctx) {
           final hasStar =
@@ -600,7 +669,6 @@ class _BookReaderPageState extends State<BookReaderPage> {
               label: Text(AppLocalizations.of(sheetContext).tr('viewFinalSummary'),
                   style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
               onPressed: () {
-                Navigator.pop(sheetContext);
                 if (parentContext.mounted) {
                   _showBookStats(parentContext, state);
                 }
@@ -625,7 +693,6 @@ class _BookReaderPageState extends State<BookReaderPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
                 onPressed: () async {
-                  Navigator.pop(sheetContext);
                   final deduceId = {
                     'nebelheim': '113',
                     'lighthouse': '114',
@@ -680,6 +747,9 @@ class _BookReaderPageState extends State<BookReaderPage> {
                                 failedAttempts: failedAttempts,
                                 // Recompensa: estrella azul, sin XP.
                                 blueStarReward: true,
+                                // El Acertijo Final nunca ramifica: los fallos
+                                // solo hacen perder puntos y recompensas.
+                                allowBranch: false,
                                 onSubmit: (ans, hints) async {
                                   if (solved) return;
                                   final ok = p.checkAnswer(ans);
@@ -790,6 +860,15 @@ class _BookReaderPageState extends State<BookReaderPage> {
     final avgTime =
         times.isEmpty ? null : times.reduce((a, b) => a + b) ~/ times.length;
     final hasStar = repo.hasBlueStar(state.book.id);
+    // Desvíos tomados en este libro: cada partida cuenta su propia versión.
+    final took = state.pages
+        .where((p) => repo.branchChoices.containsKey(p.puzzle.id))
+        .map((p) =>
+            BookBloc.branchTitleFor(
+                p.puzzle.id,
+                AppLocalizations.of(parentContext).locale.languageCode) ??
+            p.puzzle.id)
+        .toList();
     String fmtTime(int s) =>
         s < 60 ? '${s}s' : '${s ~/ 60}m ${s % 60}s';
     showDialog(
@@ -844,6 +923,16 @@ class _BookReaderPageState extends State<BookReaderPage> {
                 Colors.brown,
                 isEn ? 'Hints used' : 'Pistas usadas',
                 '$hints',
+              ),
+              _bookStatRow(
+                Icons.alt_route,
+                Colors.purple.shade700,
+                isEn ? 'Story version' : 'Versión historia',
+                took.isEmpty
+                    ? (isEn ? 'Straight' : 'Lineal')
+                    : (isEn
+                        ? '${took.length} detour(s)'
+                        : '${took.length} desvío(s)'),
               ),
               _bookStatRow(
                 Icons.star,
@@ -1104,8 +1193,10 @@ class _BookReaderPageState extends State<BookReaderPage> {
         children: [
           BlocListener<BookBloc, BookState>(
         listenWhen: (prev, curr) =>
-            curr is BookLoaded && curr.lastAnswerCorrect != null &&
-            (prev is! BookLoaded || prev.lastAnswerCorrect != curr.lastAnswerCorrect),
+            curr is BookLoaded &&
+            (prev is! BookLoaded ||
+                prev.lastAnswerCorrect != curr.lastAnswerCorrect ||
+                prev.failedAttemptsOnPage != curr.failedAttemptsOnPage),
         listener: (context, state) {
           if (state is BookLoaded) {
             if (state.lastAnswerCorrect == true) {
@@ -1116,6 +1207,24 @@ class _BookReaderPageState extends State<BookReaderPage> {
               }
             } else if (state.lastAnswerCorrect == false) {
               FeedbackService().error();
+              // Tercer fallo: Watson avisa de que la historia cambia y los
+              // puntos de esta página se pierden para la estadística final.
+              if (state.failedAttemptsOnPage >= 3 &&
+                  state.branchedPuzzleIds.contains(state.currentPage.puzzle.id)) {
+                final isEn = AppLocalizations.of(context).locale.languageCode == 'en';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.brown.shade800,
+                    content: Text(
+                      isEn
+                          ? 'Watson: from here the story changes — the next pages and riddles will be different, and these points plus this page\'s reward are lost.'
+                          : 'Watson: a partir de aquí la historia cambia — las siguientes páginas y acertijos serán distintos y habrás perdido estos puntos y su recompensa.',
+                      style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                    ),
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              }
             }
             // Si se deja de estar resuelto (p. ej. empezar de nuevo),
             // se permite volver a celebrar la finish_page al resolver.
@@ -1130,6 +1239,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
           if (state is BookLoaded && _pageController.hasClients) {
             unawaited(_stopReading());
             _syncing = true;
+            // D1: nueva página -> reinicia el cronómetro del tiempo medio.
+            _pageStartTime = DateTime.now();
             _pageController
                 .animateToPage(
               state.currentIndex,
@@ -1175,8 +1286,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
                     if (_syncing) return;
                     // Modo exigente: el deslizamiento no puede superar
                     // el primer acertijo sin resolver (rebote + aviso).
-                    if (_isPageLocked(state, i)) {
-                      _showStrictLockedMessage();
+                    if (_isPageLocked(state, i)) {                      _showStrictLockedMessage();
                       _syncing = true;
                       _pageController
                           .animateToPage(
@@ -1188,6 +1298,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
                       return;
                     }
                     // Navegación libre: deslizamiento sin bloqueo.
+                    _pageStartTime = DateTime.now();
                     context.read<BookBloc>().add(GoToPageEvent(i));
                   },
                   itemBuilder: (context, index) {
@@ -1392,7 +1503,9 @@ class _BookReaderPageState extends State<BookReaderPage> {
                 onSubmit: (answer, hintsUsed) {
                   if (isCurrent) {
                     final bonus = _isTimed && _secondsLeft > 60;
-                    context.read<BookBloc>().add(SubmitPageAnswerEvent(answer, hintsUsed: hintsUsed, timedBonus: bonus));
+                    // D1: tiempo real en la página -> alimenta "tiempo medio".
+                    final elapsed = DateTime.now().difference(_pageStartTime).inSeconds.clamp(1, 14400);
+                    context.read<BookBloc>().add(SubmitPageAnswerEvent(answer, hintsUsed: hintsUsed, timedBonus: bonus, elapsedSeconds: elapsed));
                     if (bonus && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Time bonus +30% XP!' : '¡Bonus tiempo +30% XP!')));
                   }
                 },

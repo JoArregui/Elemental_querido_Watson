@@ -162,7 +162,7 @@ Libros 2–6 reutilizan del pool (ej. Lighthouse: `007,005,003,004,010,009…`).
 
 - **Pistas progresivas:** `Puzzle.hints` (`puzzle.dart:16`) + `hintForLevel`. `PuzzleCard` (`puzzle_card.dart:32`) lleva `_hintLevel 0..3`; cada uso resta **-5 XP** (`book_bloc.dart:114`: `penalty=(hints*5).clamp(0,exp-1)`, `awarded=(exp-penalty).clamp(1,999)`). Auto-pista al fallar 1 vez → nivel 1, al fallar 2 veces → nivel 2 + mensaje *“el siguiente fallo cambia la historia”*.
 - **Dificultad:** `easy <25`, `medium 25-39`, `hard 40+` (`puzzle.dart:48`). Reordenamiento Easy→Hard pendiente (A2 resto).
-- **Vidas:** `isBlockedByAttempts = failedAttempts>=3` (`book_state.dart:73`), `BookBloc` bloquea `SubmitPageAnswerEvent`. Tras 2 fallos se marca `branchedPuzzleIds` y al avanzar (`NextPageEvent:62`) se sustituye la siguiente página por puzzle **101–112** (`_branchIdFor`).
+- **Vidas:** `isBlockedByAttempts = failedAttempts>=3` (`book_state.dart:73`), `BookBloc` bloquea `SubmitPageAnswerEvent`. Al 3.er fallo se marca `branchedPuzzleIds`, Watson avisa (“a partir de aquí la historia cambia”) y se **pasa de página automáticamente** a la siguiente sustituida por el puzzle **101–112** (`_branchIdFor`) con sus puntos perdidos; solo en la última página queda bloqueada sin avanzar.
 - **Contrarreloj:** `_isTimed/_secondsLeft` (`book_reader_page.dart:34`) + `timedBonus` → `awarded*1.3`.
 - **XP:** entero por puzzle; suma por libro `StoryBook.totalexperiencia` (`story_book.dart:29`) y global `BookProgressRepository.totalexperiencia()`.
 
@@ -221,7 +221,7 @@ lib/
 - Estados `BookInitial/Loading/Loaded(book,pages,currentIndex,solvedPuzzleIds,totalexperiencia,lastAnswerCorrect?,failedAttemptsOnPage,branchedPuzzleIds,lastWasAlternative)/Error`.
 - Getters: `currentPage`, `isCurrentSolved`, `solvedCount`, `progress`, `isPageUnlocked=>true`, `canGoNext/canGoPrevious/isLastPage/isFirstPage`, `maxPossibleexperiencia/missedexperiencia`, `isBlockedByAttempts/canAttempt`, `isFullyCompleted`, `completionRate`, `endingTier` (`perfect` si fullyCompleted, `good >=0.7`, `half >=0.4`, `low`), `isBookCompleted`.
 - Eventos `LoadBookEvent(bookId,initialPage)`, `GoToPageEvent`, `NextPageEvent`, `PreviousPageEvent`, `SubmitPageAnswerEvent(answer,hintsUsed,timedBonus)`, `ClearPageResultEvent`, `ResetBookEvent`.
-- **Branching** (`book_bloc.dart:170`): `_branchIdFor` `B05→101, B10→102, 007→103, 005→104, C05→105, O05→106, T08→107, A06→108, B22→109, B25→110, 009→111, 029→112`; `NextPage` reemplaza `pages[next]` por `branchPuzzle` + `altStory/Title` ES/EN.
+- **Branching** (`book_bloc.dart:170`): `_branchIdFor` `B05→101, B10→102, 007→103, 005→104, C05→105, O05→106, T08→107, A06→108, B22→109, B25→110, 009→111, 029→112`; al 3.er fallo el propio `SubmitPageAnswerEvent` inyecta el `branchPuzzle` en `pages[next]` + `altStory/Title` ES/EN y avanza solo (`NextPageEvent` lo reinyecta de forma idempotente si se vuelve atrás y se sigue). Las páginas ramificadas quedan bloqueadas sin reintentos (puntos perdidos) y no frenan el modo exigente.
 
 **Puzzle (legado):** `PuzzleBloc` con `GetPuzzle/GetAllPuzzles` existe pero el flujo principal usa `BookBloc` directo.
 

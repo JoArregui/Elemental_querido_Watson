@@ -23,7 +23,8 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
   bool _isSolved = false;
   bool? _lastCorrect;
   int _failedAttempts = 0;
-  bool _branched = false; // camino alternativo: 2 opciones tras 3 fallos
+  // En el Mapa de Nebelheim la historia nunca cambia: los fallos solo
+  // hacen perder puntos y recompensas (sin camino alternativo).
   bool _showCelebration = false;
   String? _lastLocale;
   bool _initialized = false;
@@ -51,6 +52,14 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
   }
 
   Timer? _celebrationTimer;
+  // D1: cronómetro para el tiempo medio por puzzle.
+  DateTime _startTime = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _startTime = DateTime.now();
+  }
 
   @override
   void dispose() {
@@ -64,8 +73,8 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
     final ok = _puzzle.checkAnswer(answer);
     // Capturar l10n antes de awaits para evitar use_build_context_synchronously
     final l10nBefore = AppLocalizations.of(context);
-    final localeBefore = l10nBefore.locale.languageCode;
-    await repo.recordAttempt(puzzleId: _puzzle.id, success: ok, hintsUsed: hintsUsed);
+    final elapsed = DateTime.now().difference(_startTime).inSeconds.clamp(1, 14400);
+    await repo.recordAttempt(puzzleId: _puzzle.id, success: ok, hintsUsed: hintsUsed, seconds: elapsed);
     if (!mounted) return;
     if (ok) {
       final maxPenalty = (_puzzle.experiencia - 1).clamp(0, 999);
@@ -99,36 +108,12 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
         if (mounted) setState(() => _showCelebration = false);
       });
     } else {
-      final next = (_failedAttempts + 1).clamp(0, 3);
-      final triggersBranch = next == 3 && !_branched;
-      if (triggersBranch) {
-        await repo.recordBranch(_puzzle.id, 'alt');
-      }
+      // Sin cambio de historia en el mapa: el fallo solo resta puntos
+      // (baja la tasa de acierto) y la recompensa solo llega si aciertas.
       setState(() {
         _lastCorrect = false;
-        _failedAttempts = next;
-        // Rama real: Watson reduce las opciones a 2 y se puede seguir intentando.
-        if (triggersBranch) {
-          _puzzle = AlleyPuzzles.branchForAlley(
-              widget.alleyIndex, localeBefore == 'en');
-          _branched = true;
-        }
+        _failedAttempts = (_failedAttempts + 1).clamp(0, 3);
       });
-      if (triggersBranch && mounted) {
-        final isEn = AppLocalizations.of(context).locale.languageCode == 'en';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.brown.shade800,
-            content: Text(
-              isEn
-                  ? 'Alternative path! Watson narrows it down to 2 options — keep trying!'
-                  : '¡Camino alternativo! Watson lo reduce a 2 opciones — ¡sigue intentando!',
-              style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
-            ),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
     }
   }
 
@@ -260,6 +245,8 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                       isSolved: _isSolved,
                       lastAnswerCorrect: _lastCorrect,
                       failedAttempts: _failedAttempts,
+                      // En el mapa la historia nunca cambia.
+                      allowBranch: false,
                       onSubmit: _onSubmit,
                     ),
                     const SizedBox(height: 12),
@@ -270,7 +257,7 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                         label: Text(isEn ? 'Back to map' : 'Volver al mapa', style: const TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () => Navigator.pop(context, true),
                       )
-                    else if (_branched)
+                    else
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -278,9 +265,9 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(color: Colors.brown.shade800, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.amber)),
                             child: Row(children: [
-                              const Icon(Icons.alt_route, color: Colors.amber),
+                              const Icon(Icons.info_outline, color: Colors.amber),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(isEn ? 'Alternative path — 2 options left. You can keep trying above.' : 'Camino alternativo — quedan 2 opciones. Puedes seguir intentando arriba.', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12))),
+                              Expanded(child: Text(isEn ? 'No story change here — each fail lowers your stats. Leave without solving and you lose the XP and collectible.' : 'Aquí la historia no cambia — cada fallo baja tu estadística. Si sales sin acertar, pierdes la experiencia y el coleccionable.', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12))),
                             ]),
                           ),
                           const SizedBox(height: 8),
@@ -290,17 +277,17 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                             label: Text(isEn ? 'Back to map' : 'Volver al mapa', style: const TextStyle(fontWeight: FontWeight.bold)),
                             onPressed: () => Navigator.pop(context, false),
                           ),
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(foregroundColor: Colors.amber, side: const BorderSide(color: Colors.amber)),
+                            icon: const Icon(Icons.lightbulb, size: 18),
+                            label: Text(isEn ? 'Need a hint? Fail once to see Watson' : '¿Pista? Falla una vez para ver a Watson'),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_puzzle.hintText), duration: const Duration(seconds: 3)));
+                            },
+                          ),
                         ],
                       )
-                    else
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(foregroundColor: Colors.amber, side: const BorderSide(color: Colors.amber)),
-                        icon: const Icon(Icons.lightbulb, size: 18),
-                        label: Text(isEn ? 'Need a hint? Fail once to see Watson' : '¿Pista? Falla una vez para ver a Watson'),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_puzzle.hintText), duration: const Duration(seconds: 3)));
-                        },
-                      ),
                   ],
                 ),
               ),

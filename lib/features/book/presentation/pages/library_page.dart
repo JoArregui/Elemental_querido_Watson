@@ -126,6 +126,11 @@ class LibraryPage extends StatelessWidget {
       for (int i = 1; i <= 15; i++) 'train-$i',
       for (int i = 1; i <= 15; i++) 'abbey-$i',
     ];
+    final collectibleJpgIds = {
+      for (int i = 1; i <= 6; i++) 'nebelheim-$i',
+    };
+    String collectibleAsset(String id) =>
+        'assets/rewards/collectibles/$id.${collectibleJpgIds.contains(id) ? 'jpg' : 'png'}';
     final rewards = repo.rewardsUnlocked; // 6 libros
     final rewardData = [
       {'id':'nebelheim','icon':Icons.schedule, 'color': const Color(0xFF4E342E), 'label':'Nebelheim'},
@@ -135,6 +140,99 @@ class LibraryPage extends StatelessWidget {
       {'id':'train','icon':Icons.train, 'color': const Color(0xFF3E2723), 'label':'Expreso'},
       {'id':'abbey','icon':Icons.account_balance, 'color': const Color(0xFF3E2723), 'label':'Abadía'},
     ];
+
+    void showImagePreview(String asset, String title, Widget fallback) {
+      showDialog(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.92),
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(12),
+          child: Stack(
+            children: [
+              Center(
+                child: InteractiveViewer(
+                  minScale: 0.8,
+                  maxScale: 4,
+                  child: Image.asset(
+                    asset,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => fallback,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  tooltip: AppLocalizations.of(context).locale.languageCode == 'en' ? 'Close' : 'Cerrar',
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 8,
+                child: Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    void showWidgetPreview(String title, Widget child) {
+      showDialog(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.92),
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              InteractiveViewer(minScale: 0.8, maxScale: 4, child: child),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  tooltip: AppLocalizations.of(context).locale.languageCode == 'en' ? 'Close' : 'Cerrar',
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 8,
+                child: Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget thumbnail({required String asset, required bool unlocked, required Widget fallback, required VoidCallback onTap}) {
+      final image = SizedBox.expand(
+        child: Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_, __, ___) => fallback),
+      );
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: unlocked ? onTap : null,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              image,
+              if (!unlocked) Container(color: Colors.black54, child: const Icon(Icons.lock, size: 18, color: Colors.white70)),
+              if (unlocked) const Positioned(right: 3, bottom: 3, child: Icon(Icons.zoom_in, size: 15, color: Colors.white70)),
+            ],
+          ),
+        ),
+      );
+    }
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -146,11 +244,11 @@ class LibraryPage extends StatelessWidget {
             // — Recompensas con imagen —
             Text(AppLocalizations.of(context).locale.languageCode == 'en' ? 'Rewards (images)' : 'Recompensas (imágenes)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.brown)),
             const SizedBox(height: 6),
-            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.68), itemCount: rewardData.length, itemBuilder: (_, i) {
+            GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.55), itemCount: rewardData.length, itemBuilder: (_, i) {
               final r = rewardData[i];
               final unlocked = rewards.contains(r['id']);
               final holmesFrame = isHolmes && unlocked;
-              final asset = 'assets/rewards/${r['id']}.png';
+              final asset = 'assets/rewards/${r['id']}.jpg';
               return Container(
                 decoration: BoxDecoration(
                   color: unlocked ? Colors.white : Colors.brown.shade100,
@@ -159,17 +257,31 @@ class LibraryPage extends StatelessWidget {
                   boxShadow: holmesFrame ? [BoxShadow(color: Colors.amber.withValues(alpha:0.5), blurRadius: 6)] : null,
                 ),
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Stack(alignment: Alignment.center, children: [
-                      Image.asset(asset, width: 72, height: 72, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(width:72,height:72,color:(r['color'] as Color),child: Icon(r['icon'] as IconData, color: Colors.amber.shade200))),
-                      if (!unlocked) Container(width:72,height:72,color: Colors.black54, child: const Icon(Icons.lock, size: 22, color: Colors.white70)),
-                      if (holmesFrame) Positioned(top:2,right:2,child: Container(padding:const EdgeInsets.all(2), decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle), child: const Icon(Icons.emoji_events, size: 10, color: Colors.brown))),
-                    ]),
+                  SizedBox(
+                    width: 64,
+                    height: 64,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: thumbnail(
+                        asset: asset,
+                        unlocked: unlocked,
+                        fallback: Container(color: r['color'] as Color, child: Icon(r['icon'] as IconData, color: Colors.amber.shade200)),
+                        onTap: () => showImagePreview(asset, r['label'] as String, Container(color: r['color'] as Color, child: Icon(r['icon'] as IconData, color: Colors.amber.shade200, size: 80))),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(r['label'] as String, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: unlocked ? Colors.brown.shade800 : Colors.brown.shade400), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Text(unlocked ? '✔ ${AppLocalizations.of(context).locale.languageCode=='en'?'Unlocked':'Desbloqueada'}' : '🔒', style: const TextStyle(fontSize: 9)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(r['label'] as String, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: unlocked ? Colors.brown.shade800 : Colors.brown.shade400), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(unlocked ? '✔ ${AppLocalizations.of(context).locale.languageCode=='en'?'Unlocked':'Desbloqueada'}' : '🔒', style: const TextStyle(fontSize: 9)),
+                    ),
+                  ),
                 ]),
               );
             }),
@@ -183,10 +295,15 @@ class LibraryPage extends StatelessWidget {
               final asset = 'assets/rewards/secrets/$id.png';
               return Container(
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: solved ? Colors.amber.shade700 : Colors.brown.shade300, width: solved ? 2 : 1)),
-                child: ClipRRect(borderRadius: BorderRadius.circular(7), child: Stack(fit: StackFit.expand, children: [
-                  Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(color: Colors.brown.shade100, child: Icon(Icons.lock, size: 16, color: Colors.brown.shade400))),
-                  if (!solved) Container(color: Colors.black54, child: const Icon(Icons.lock, size: 16, color: Colors.white70)),
-                ])),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: thumbnail(
+                      asset: asset,
+                      unlocked: solved,
+                      fallback: Container(color: Colors.brown.shade100, child: Icon(Icons.auto_awesome, size: 18, color: Colors.amber.shade700)),
+                      onTap: () => showImagePreview(asset, '${AppLocalizations.of(context).locale.languageCode == 'en' ? 'Secret' : 'Secreto'} $id', Container(color: Colors.brown.shade100, child: Icon(Icons.auto_awesome, size: 80, color: Colors.amber.shade700))),
+                    ),
+                  ),
               );
             }),
             const SizedBox(height: 4),
@@ -254,9 +371,16 @@ class LibraryPage extends StatelessWidget {
                                     : Colors.blue.shade200,
                                 width: earned ? 2 : 1),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                          child: InkWell(
+                            onTap: earned
+                                ? () => showWidgetPreview(
+                                    r['label'] as String,
+                                    Icon(Icons.star, size: 180, color: Colors.blue.shade700),
+                                  )
+                                : null,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
                               Stack(
                                 alignment: Alignment.center,
                                 children: [
@@ -297,7 +421,8 @@ class LibraryPage extends StatelessWidget {
                                       color: earned
                                           ? Colors.blue.shade700
                                           : Colors.brown.shade400)),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -313,13 +438,18 @@ class LibraryPage extends StatelessWidget {
             GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, crossAxisSpacing: 6, mainAxisSpacing: 6, childAspectRatio: 0.85), itemCount: allCollectibles.length, itemBuilder: (_, i) {
                 final id = allCollectibles[i];
                 final hasIt = collected.contains(id);
-                final asset = 'assets/rewards/collectibles/$id.png';
+                final asset = collectibleAsset(id);
                 return Container(
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: hasIt ? Colors.amber.shade700 : Colors.brown.shade200, width: hasIt ? 2 : 1)),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(7), child: Stack(fit: StackFit.expand, children: [
-                    Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(color: hasIt ? Colors.amber.shade100 : Colors.brown.shade50, child: Icon(hasIt ? Icons.emoji_events : Icons.lock_outline, size: 14, color: hasIt ? Colors.brown : Colors.brown.shade300))),
-                    if (!hasIt) Container(color: Colors.black45, child: const Icon(Icons.lock_outline, size: 14, color: Colors.white70)),
-                  ])),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(7),
+                            child: thumbnail(
+                              asset: asset,
+                              unlocked: hasIt,
+                              fallback: Container(color: Colors.amber.shade100, child: Icon(Icons.emoji_events, size: 18, color: Colors.brown.shade700)),
+                              onTap: () => showImagePreview(asset, id, Container(color: Colors.amber.shade100, child: Icon(Icons.emoji_events, size: 80, color: Colors.brown.shade700))),
+                            ),
+                          ),
                 );
               }),
           ]),

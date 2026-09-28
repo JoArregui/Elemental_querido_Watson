@@ -8,6 +8,9 @@ class DailyPuzzleRepository {
   static const _puzzleIdKey = 'daily_puzzle_id';
   static const _streakKey = 'daily_streak';
   static const _lastSolvedDateKey = 'daily_last_solved';
+  static const _attemptsKey = 'daily_attempts';
+  static const _attemptsDateKey = 'daily_attempts_date';
+  static const maxDailyAttempts = 3;
 
   String? _todayId;
   String? _todayDate;
@@ -29,9 +32,48 @@ class DailyPuzzleRepository {
     final picked = all[idx].id;
     await prefs.setString(_dateKey, today);
     await prefs.setString(_puzzleIdKey, picked);
+    // Nuevo día: reinicia los 3 intentos del reto diario.
+    await prefs.setInt(_attemptsKey, 0);
+    await prefs.setString(_attemptsDateKey, today);
     _todayDate = today;
     _todayId = picked;
     return picked;
+  }
+
+  /// Intentos fallidos de hoy (0..3). Se reinicia cada día.
+  Future<int> getTodayAttempts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = _todayString();
+    if (prefs.getString(_attemptsDateKey) != today) {
+      await prefs.setInt(_attemptsKey, 0);
+      await prefs.setString(_attemptsDateKey, today);
+      return 0;
+    }
+    return prefs.getInt(_attemptsKey) ?? 0;
+  }
+
+  Future<int> getRemainingAttempts() async {
+    final used = await getTodayAttempts();
+    return (maxDailyAttempts - used).clamp(0, maxDailyAttempts);
+  }
+
+  /// Registra un fallo y devuelve los intentos restantes (0..2).
+  Future<int> recordFailedAttempt() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = _todayString();
+    var used = prefs.getInt(_attemptsKey) ?? 0;
+    if (prefs.getString(_attemptsDateKey) != today) used = 0;
+    used = (used + 1).clamp(0, maxDailyAttempts);
+    await prefs.setInt(_attemptsKey, used);
+    await prefs.setString(_attemptsDateKey, today);
+    return (maxDailyAttempts - used).clamp(0, maxDailyAttempts);
+  }
+
+  /// true si ya ha agotado los 3 intentos de hoy sin acertar.
+  Future<bool> isTodayBlocked() async {
+    if (await isTodaySolved()) return false;
+    final used = await getTodayAttempts();
+    return used >= maxDailyAttempts;
   }
 
   Future<int> getStreak() async {

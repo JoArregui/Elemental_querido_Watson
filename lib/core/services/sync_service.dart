@@ -73,12 +73,28 @@ class SyncService {
         date: DateTime.now().toIso8601String().split('T').first,
         isEn: isEn,
       );
+
+      // WhatsApp puede interpretar XFile.fromData como documento aunque
+      // tenga nombre y MIME de PNG. Usamos archivos temporales reales para
+      // que Android conserve la extensión y lo reconozca como fotografía.
+      final tempDir = await getTemporaryDirectory();
+      final stamp = DateTime.now().microsecondsSinceEpoch;
+      final frontFile = File('${tempDir.path}/postal_anverso_$stamp.png');
+      final backFile = File('${tempDir.path}/postal_reverso_$stamp.png');
+      await frontFile.writeAsBytes(front, flush: true);
+      await backFile.writeAsBytes(back, flush: true);
       await SharePlus.instance.share(ShareParams(
         files: [
-          XFile.fromData(front,
-              name: 'postal_anverso.png', mimeType: 'image/png'),
-          XFile.fromData(back,
-              name: 'postal_reverso.png', mimeType: 'image/png'),
+          XFile(
+            frontFile.path,
+            name: 'postal_anverso.png',
+            mimeType: 'image/png',
+          ),
+          XFile(
+            backFile.path,
+            name: 'postal_reverso.png',
+            mimeType: 'image/png',
+          ),
         ],
         text: text,
         subject: subject,

@@ -50,12 +50,16 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         // Modo exigente: no se puede saltar más allá del primer acertijo sin resolver.
         if (_isStrict() && event.pageIndex > _firstUnsolvedIndex(s)) return;
         // Navegación libre: cualquier página es accesible.
+        // Si la página destino ya quedó ramificada por 3 fallos, se muestra
+        // bloqueada (puntos perdidos, sin reintentos).
+        final targetBlocked =
+            s.branchedPuzzleIds.contains(s.pages[event.pageIndex].puzzle.id);
         await progress.saveLastPosition(
             bookId: s.book.id, pageIndex: event.pageIndex);
         emit(s.copyWith(
           currentIndex: event.pageIndex,
           lastAnswerCorrect: () => null,
-          failedAttemptsOnPage: 0,
+          failedAttemptsOnPage: targetBlocked ? 3 : 0,
         ));
       }
     });
@@ -64,8 +68,10 @@ class BookBloc extends Bloc<BookEvent, BookState> {
       final s = state;
       if (s is BookLoaded) {
         if (!s.canGoNext) return;
-        // Modo exigente: hasta acertar la página actual no se puede pasar.
-        if (_isStrict() && !s.isCurrentSolved) return;
+        // Modo exigente: hasta acertar la página actual no se puede pasar,
+        // salvo que ya esté bloqueada por 3 fallos (historia ramificada,
+        // puntos perdidos): entonces se permite avanzar.
+        if (_isStrict() && !s.isCurrentSolved && !s.isBlockedByAttempts) return;
         final nextIdx = s.currentIndex + 1;
         List<BookPage> pages = s.pages;
         final wasBranched = s.branchedPuzzleIds.contains(s.currentPage.puzzle.id);
@@ -89,11 +95,13 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         }
         await progress.saveLastPosition(
             bookId: s.book.id, pageIndex: nextIdx);
+        final nextBlocked =
+            s.branchedPuzzleIds.contains(pages[nextIdx].puzzle.id);
         emit(s.copyWith(
           pages: pages,
           currentIndex: nextIdx,
           lastAnswerCorrect: () => null,
-          failedAttemptsOnPage: 0,
+          failedAttemptsOnPage: nextBlocked ? 3 : 0,
         ));
       }
     });
@@ -104,10 +112,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
         if (s.currentIndex == 0) return;
         await progress.saveLastPosition(
             bookId: s.book.id, pageIndex: s.currentIndex - 1);
+        final targetBlocked = s.branchedPuzzleIds
+            .contains(s.pages[s.currentIndex - 1].puzzle.id);
         emit(s.copyWith(
           currentIndex: s.currentIndex - 1,
           lastAnswerCorrect: () => null,
-          failedAttemptsOnPage: 0,
+          failedAttemptsOnPage: targetBlocked ? 3 : 0,
         ));
       }
     });
@@ -115,11 +125,17 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     on<SubmitPageAnswerEvent>((event, emit) async {
       final s = state;
       if (s is BookLoaded) {
-        if (s.isBlockedByAttempts) return;
+        // Página bloqueada o ya ramificada (puntos perdidos): sin reintentos.
+        if (s.isBlockedByAttempts ||
+            s.branchedPuzzleIds.contains(s.currentPage.puzzle.id)) {
+          return;
+        }
         final puzzle = s.currentPage.puzzle;
         final isCorrect = puzzle.checkAnswer(event.answer);
-        // D1: registrar telemetría de cada intento
-        await progress.recordAttempt(puzzleId: puzzle.id, success: isCorrect, hintsUsed: event.hintsUsed, seconds: 0);
+        // D1: registrar telemetría de cada intento, con el tiempo real
+        // medido en la página para que "tiempo medio" tenga datos.
+        final elapsed = event.elapsedSeconds < 0 ? 0 : event.elapsedSeconds;
+        await progress.recordAttempt(puzzleId: puzzle.id, success: isCorrect, hintsUsed: event.hintsUsed, seconds: elapsed);
         if (isCorrect) {
           // A1: penalización -5 XP por pista usada (mín 1 XP) + A2 bonus tiempo +30%
           final maxPenalty = (puzzle.experiencia - 1).clamp(0, 999);
@@ -145,16 +161,53 @@ class BookBloc extends Bloc<BookEvent, BookState> {
           ));
         } else {
           final nextFailed = s.failedAttemptsOnPage + 1;
-          final isThirdFail = nextFailed == 3;
+          final isThirdFail = nextFailed >= 3;
           final newBranched = isThirdFail ? {...s.branchedPuzzleIds, puzzle.id} : s.branchedPuzzleIds;
           if (isThirdFail) {
             await progress.recordBranch(puzzle.id, 'alt');
           }
-          emit(s.copyWith(
-            lastAnswerCorrect: () => false,
-            failedAttemptsOnPage: nextFailed.clamp(0, 3),
-            branchedPuzzleIds: newBranched,
-          ));
+          // Tercer fallo: Watson avisa de que la historia cambia y se pasa
+          // de página directamente a la rama alternativa (puntos perdidos).
+          // En la última página no hay a dónde avanzar: queda bloqueada.
+          if (isThirdFail && s.canGoNext) {
+            emit(s.copyWith(
+              lastAnswerCorrect: () => false,
+              failedAttemptsOnPage: nextFailed.clamp(0, 3),
+              branchedPuzzleIds: newBranched,
+            ));
+            try {
+              final branchId = _branchIdFor(puzzle.id);
+              final puzzleDs = GetIt.I.get<PuzzleLocalDataSource>();
+              final branchPuzzle = await puzzleDs.getPuzzle(branchId);
+              final locale = GetIt.I.get<LocaleService>().value.languageCode;
+              final nextPage = s.pages[s.currentIndex + 1];
+              final altPage = nextPage.copyWith(
+                puzzle: branchPuzzle,
+                storyText: _branchStoryFor(puzzle.id, locale) ?? nextPage.storyText,
+                storyTitle: _branchTitleFor(puzzle.id, locale) ?? nextPage.storyTitle,
+              );
+              final pages = List<BookPage>.from(s.pages);
+              pages[s.currentIndex + 1] = altPage;
+              await progress.saveLastPosition(
+                  bookId: s.book.id, pageIndex: s.currentIndex + 1);
+              emit(s.copyWith(
+                pages: pages,
+                currentIndex: s.currentIndex + 1,
+                lastAnswerCorrect: () => null,
+                failedAttemptsOnPage: 0,
+                branchedPuzzleIds: newBranched,
+              ));
+            } catch (_) {
+              // Sin rama disponible: la página queda bloqueada con los
+              // puntos perdidos para la estadística final.
+            }
+          } else {
+            emit(s.copyWith(
+              lastAnswerCorrect: () => false,
+              failedAttemptsOnPage: nextFailed.clamp(0, 3),
+              branchedPuzzleIds: newBranched,
+            ));
+          }
         }
       }
     });
@@ -194,10 +247,17 @@ class BookBloc extends Bloc<BookEvent, BookState> {
 
   /// Primera página con acertijo sin resolver (o última si todo está resuelto).
   /// En modo exigente es el límite de avance: se puede estar en ella, pero no pasarla.
+  /// Las páginas ramificadas por 3 fallos se consideran superadas para el
+  /// avance (sus puntos ya se perdieron, la historia continúa).
   int _firstUnsolvedIndex(BookLoaded s) {
-    final idx = s.pages.indexWhere(
+    var idx = s.pages.indexWhere(
         (p) => !s.solvedPuzzleIds.contains(p.puzzle.id));
-    return idx == -1 ? s.pages.length - 1 : idx;
+    if (idx == -1) return s.pages.length - 1;
+    while (idx < s.pages.length &&
+        s.branchedPuzzleIds.contains(s.pages[idx].puzzle.id)) {
+      idx++;
+    }
+    return idx >= s.pages.length ? s.pages.length - 1 : idx;
   }
 
   String _branchIdFor(String failedId) {
@@ -241,7 +301,12 @@ class BookBloc extends Bloc<BookEvent, BookState> {
     return isEn ? enMap[failedId] : esMap[failedId];
   }
 
-  String? _branchTitleFor(String failedId, String locale) {
+  String? _branchTitleFor(String failedId, String locale) =>
+      BookBloc.branchTitleFor(failedId, locale);
+
+  /// Título del desvío que provocó el fallo triple (para mostrar "tu versión"
+  /// de la historia: con 12 puntos de rama no hay dos partidas iguales).
+  static String? branchTitleFor(String failedId, String locale) {
     final isEn = locale == 'en';
     const esMap = {
       'B05': 'Atajo de Watson',

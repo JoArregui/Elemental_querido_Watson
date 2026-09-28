@@ -16,6 +16,9 @@ class PuzzleCard extends StatefulWidget {
   /// Cuando es true, la recompensa es una estrella azul (sin XP):
   /// se oculta el chip "+XP" y los mensajes de ganancia de XP.
   final bool blueStarReward;
+  /// Cuando es false (Acertijo Final y Mapa de Nebelheim), Watson nunca
+  /// cambia la historia: los fallos solo hacen perder puntos y recompensas.
+  final bool allowBranch;
 
   const PuzzleCard({
     super.key,
@@ -26,6 +29,7 @@ class PuzzleCard extends StatefulWidget {
     required this.onSubmit,
     this.textScale = 1.0,
     this.blueStarReward = false,
+    this.allowBranch = true,
   });
 
   @override
@@ -80,6 +84,37 @@ class _PuzzleCardState extends State<PuzzleCard> {
   bool _isMapExclusiveKind(String kind) {
     const exclusive = {'cat_footprints', 'moon_phases', 'memory_runes', 'river_pipes', 'shadow_match', 'wind_compass', 'village_wheel', 'tower_gears'};
     return exclusive.contains(kind);
+  }
+
+  /// Texto de Watson según nº de fallo y si la historia puede ramificarse.
+  /// En el Acertijo Final y el Mapa de Nebelheim (allowBranch=false) nunca
+  /// cambia la historia: los fallos solo restan puntos y recompensas.
+  String _branchHintSubtitle(BuildContext context) {
+    final isEn =
+        AppLocalizations.of(context).locale.languageCode == 'en';
+    if (_hintLevel == 1) {
+      return isEn
+          ? 'Hint 1/3 (-5 XP if you solve now)'
+          : 'Pista 1/3 (-5 XP si aciertas ahora)';
+    }
+    if (_hintLevel == 2) {
+      if (!widget.allowBranch) {
+        return isEn
+            ? 'Hint 2/3 (-10 XP) — the story never branches here, but each fail lowers your stats.'
+            : 'Pista 2/3 (-10 XP) — aquí la historia nunca cambia, pero cada fallo te hace perder puntos.';
+      }
+      return isEn
+          ? 'Hint 2/3 (-10 XP) — next failure changes the story branch.'
+          : 'Pista 2/3 (-10 XP) — el siguiente fallo cambia la rama de la historia.';
+    }
+    if (!widget.allowBranch) {
+      return isEn
+          ? 'No story change here: fails only cost points. Leave without solving and you lose the XP, collectible, star or reward.'
+          : 'Aquí la historia no cambia: los fallos solo hacen perder puntos. Si sales sin acertar, pierdes experiencia, coleccionable, estrella o recompensa.';
+    }
+    return isEn
+        ? 'Hint 3/3 (-15 XP) — from here the story changes: next pages and riddles will be different and these points plus this page\'s reward are lost.'
+        : 'Pista 3/3 (-15 XP) — a partir de aquí la historia cambia: las siguientes páginas y acertijos serán distintos y habrás perdido estos puntos y su recompensa.';
   }
 
   @override
@@ -336,17 +371,7 @@ class _PuzzleCardState extends State<PuzzleCard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _hintLevel == 1
-                              ? (AppLocalizations.of(context).locale.languageCode == 'en'
-                                  ? 'Hint 1/3 (-5 XP if you solve now)'
-                                  : 'Pista 1/3 (-5 XP si aciertas ahora)')
-                              : _hintLevel == 2
-                                  ? (AppLocalizations.of(context).locale.languageCode == 'en'
-                                      ? 'Hint 2/3 (-10 XP) — next failure changes the story branch.'
-                                      : 'Pista 2/3 (-10 XP) — el siguiente fallo cambia la rama de la historia.')
-                                  : (AppLocalizations.of(context).locale.languageCode == 'en'
-                                      ? 'Hint 3/3 (-15 XP) — story branched! Next page will be different.'
-                                      : 'Pista 3/3 (-15 XP) — ¡historia ramificada! La historia será diferente.'),
+                          _branchHintSubtitle(context),
                           style: const TextStyle(color: Colors.white70, fontSize: 11),
                         ),
                       ],
@@ -356,7 +381,29 @@ class _PuzzleCardState extends State<PuzzleCard> {
               ),
             ),
           ],
-          if (widget.lastAnswerCorrect == false && !widget.isSolved)
+          // Página bloqueada por 3 fallos: castigo visible (puntos + recompensa
+          // perdidos). Se muestra siempre, incluso al volver a la página.
+          if (!widget.isSolved &&
+              widget.failedAttempts >= 3 &&
+              widget.allowBranch)
+            Container(
+              margin: const EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade500),
+              ),
+              child: Text(
+                AppLocalizations.of(context).locale.languageCode == 'en'
+                    ? 'Page blocked: these points and this page\'s reward (collectible) are lost. Keep playing to earn the rest!'
+                    : 'Página bloqueada: has perdido estos puntos y su recompensa (coleccionable). ¡Sigue jugando para conseguir el resto!',
+                style: const TextStyle(
+                    color: Colors.black87, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else if (widget.lastAnswerCorrect == false && !widget.isSolved)
             Container(
               margin: const EdgeInsets.only(top: 10),
               padding: const EdgeInsets.all(10),
