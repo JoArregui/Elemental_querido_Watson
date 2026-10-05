@@ -12,6 +12,7 @@ import '../../data/repositories/daily_puzzle_repository.dart';
 import '../../domain/entities/story_book.dart';
 import 'map_page.dart';
 import 'stats_page.dart';
+import 'collection_page.dart';
 import '../bloc/book_bloc.dart';
 import '../bloc/book_event.dart';
 import '../bloc/library_bloc.dart';
@@ -109,6 +110,17 @@ class LibraryPage extends StatelessWidget {
   }
 
   void _showGallery(BuildContext context) {
+    // Fix dispositivos modernos: la antigua galería era un AlertDialog con
+    // ~114 Image.asset a resolución completa (~1MB cada uno) creados de golpe
+    // dentro de SingleChildScrollView + shrinkWrap. En móviles con densidad
+    // alta se congelaba y parecía que no se abría. Ahora se abre una página
+    // con pestañas, grids perezosos y thumbnails con cacheWidth.
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CollectionPage()),
+    );
+    return;
+    // ignore: dead_code
     final repo = di.sl<BookProgressRepository>();
     final collected = repo.collectibles;
     final isHolmes = repo.isHolmesRank;
@@ -116,6 +128,26 @@ class LibraryPage extends StatelessWidget {
     final allSolved = repo.allSolvedIds;
     // 18 secretos = 101-112 ramificados + 113-118 deducciones
     final secretIds = List.generate(18, (i) => '${101 + i}');
+    final secretAssetNames = {
+      '101': 'Vagon_bifurcado.jpg',
+      '102': 'Susurro.jpg',
+      '103': 'Ruta_alternativa.jpg',
+      '104': 'Observatorio_nublado.jpg',
+      '105': 'Observatorio.jpg',
+      '106': 'Nota_alternativa.jpg',
+      '107': 'Nebelheim.jpg',
+      '108': 'Mascara_distinta.jpg',
+      '109': 'Final_ramificado.jpg',
+      '110': 'Faro_alternativo.jpg',
+      '111': 'Faro.jpg',
+      '112': 'Expreso.jpg',
+      '113': 'Cripta_alternativa.jpg',
+      '114': 'Coleccionable_perdido.jpg',
+      '115': 'Carnaval.jpg',
+      '116': 'Brujula_rota.jpg',
+      '117': 'Atajo_de_Watson.jpg',
+      '118': 'Abadia.jpg',
+    };
     final secretsSolved = secretIds.where((id) => allSecrets.contains(id) || allSolved.contains(id)).length;
     // 90 coleccionables = 30+10+10+10+15+15
     final allCollectibles = <String>[
@@ -157,7 +189,7 @@ class LibraryPage extends StatelessWidget {
                   child: Image.asset(
                     asset,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => fallback,
+                    errorBuilder: (_, _, _) => fallback,
                   ),
                 ),
               ),
@@ -215,7 +247,7 @@ class LibraryPage extends StatelessWidget {
 
     Widget thumbnail({required String asset, required bool unlocked, required Widget fallback, required VoidCallback onTap}) {
       final image = SizedBox.expand(
-        child: Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_, __, ___) => fallback),
+        child: Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_, _, _) => fallback),
       );
       return Material(
         color: Colors.transparent,
@@ -292,7 +324,8 @@ class LibraryPage extends StatelessWidget {
             GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, crossAxisSpacing: 6, mainAxisSpacing: 6, childAspectRatio: 0.85), itemCount: 18, itemBuilder: (_, i) {
               final id = secretIds[i];
               final solved = allSecrets.contains(id) || allSolved.contains(id);
-              final asset = 'assets/rewards/secrets/$id.png';
+              final assetName = secretAssetNames[id] ?? '$id.png';
+              final asset = 'assets/rewards/secrets/$assetName';
               return Container(
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: solved ? Colors.amber.shade700 : Colors.brown.shade300, width: solved ? 2 : 1)),
                   child: ClipRRect(
@@ -498,7 +531,7 @@ class LibraryPage extends StatelessWidget {
                   title: Text(l10n.locale.languageCode == 'en' ? 'Settings' : 'Ajustes', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
                     // Alto contraste — operativo: persiste y cambia scaffold a negro
-                    ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, hc, __) => SwitchListTile(
+                    ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, hc, _) => SwitchListTile(
                       secondary: Icon(Icons.contrast, color: hc ? Colors.amber.shade700 : Colors.brown),
                       title: Text(l10n.locale.languageCode == 'en' ? 'High contrast' : 'Alto contraste', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                       subtitle: Text(hc ? (l10n.locale.languageCode == 'en' ? 'Black background · ON' : 'Fondo negro · ACTIVADO') : (l10n.locale.languageCode == 'en' ? 'Standard theme' : 'Tema estándar'), style: const TextStyle(fontSize: 11)),
@@ -507,7 +540,7 @@ class LibraryPage extends StatelessWidget {
                     )),
                     const Divider(),
                     // Fuente grande — operativo: 1.0 -> 1.3 -> 1.6 via MediaQuery textScaler
-                    ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, __, ___) => ListTile(
+                    ValueListenableBuilder<bool>(valueListenable: a11y, builder: (_, _, _) => ListTile(
                       leading: const Icon(Icons.text_fields, color: Colors.brown),
                       title: Text('${l10n.locale.languageCode == 'en' ? 'Large font' : 'Fuente grande'} · ${a11y.fontLabel}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                       subtitle: Text(l10n.locale.languageCode == 'en' ? 'Applies to all pages (MediaQuery)' : 'Se aplica a toda la app (MediaQuery)', style: const TextStyle(fontSize: 11)),
@@ -518,7 +551,7 @@ class LibraryPage extends StatelessWidget {
                     // Modo de juego: simple (navegación libre) o exigente (hay que acertar para pasar)
                     ValueListenableBuilder<bool>(
                       valueListenable: readingMode,
-                      builder: (_, strict, __) => Column(
+                      builder: (_, strict, _) => Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ListTile(
@@ -657,8 +690,9 @@ class LibraryPage extends StatelessWidget {
               final total =
                   state is LibraryLoaded ? state.totalexperiencia : 0;
               String rank = l10n.tr('rankApprentice');
-              if (total >= 1500) rank = l10n.tr('rankHolmes');
-              else if (total >= 800) rank = l10n.tr('rankWatson');
+              if (total >= 1500) {
+                rank = l10n.tr('rankHolmes');
+              } else if (total >= 800) rank = l10n.tr('rankWatson');
               else if (total >= 300) rank = l10n.tr('rankInvestigator');
               // En móvil: solo ⭐ total para evitar overflowed (rank en tooltip)
               final label = isPhone ? '⭐ $total' : '⭐ $total · $rank';
@@ -916,8 +950,9 @@ class LibraryPage extends StatelessWidget {
                         final maxXp = book.pageCount * 35;
                         final xpRate = maxXp == 0 ? progress : (xp / maxXp).clamp(0.0, 1.0);
                         int stars = 0;
-                        if (progress >= 1.0) stars = 3;
-                        else if (xpRate >= 0.7 || progress >= 0.7) stars = 2;
+                        if (progress >= 1.0) {
+                          stars = 3;
+                        } else if (xpRate >= 0.7 || progress >= 0.7) stars = 2;
                         else if (progress > 0) stars = 1;
                         final hasBlueStar = di.sl<BookProgressRepository>().hasBlueStar(book.id);
                         return Row(

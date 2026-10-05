@@ -229,7 +229,7 @@ class _VillaHeader extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Image.asset('assets/mapa/plano_villa.jpg', fit: BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: const Color(0xFF3E2723), child: const Icon(Icons.map, color: Colors.amber, size: 48))),
+                child: Image.asset('assets/mapa/plano_villa.jpg', fit: BoxFit.cover, errorBuilder: (_,_,_)=> Container(color: const Color(0xFF3E2723), child: const Icon(Icons.map, color: Colors.amber, size: 48))),
               ),
               Positioned.fill(
                 child: DecoratedBox(
@@ -307,7 +307,7 @@ class _PlazaCenter extends StatelessWidget {
                 width: 112,
                 height: 112,
                 decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: solved ? Colors.green : Colors.amber, width: 3), boxShadow: [BoxShadow(color: (solved ? Colors.green : Colors.amber).withValues(alpha: 0.35), blurRadius: 10)]),
-                child: ClipOval(child: Image.asset('assets/mapa/Plaza_torre.jpg', fit: BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: const Color(0xFFFFF3CD), child: const Icon(Icons.location_city, color: Colors.brown)))),
+                child: ClipOval(child: Image.asset('assets/mapa/Plaza_torre.jpg', fit: BoxFit.cover, errorBuilder: (_,_,_)=> Container(color: const Color(0xFFFFF3CD), child: const Icon(Icons.location_city, color: Colors.brown)))),
               ),
               if (solved)
                 Positioned(
@@ -356,7 +356,7 @@ class _AlleyCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Colors.brown.shade100, child: const Icon(Icons.image_not_supported, color: Colors.brown))),
+              Image.asset(asset, fit: BoxFit.cover, errorBuilder: (_,_,_)=> Container(color: Colors.brown.shade100, child: const Icon(Icons.image_not_supported, color: Colors.brown))),
               if (solved) Container(color: Colors.black.withValues(alpha: 0.18)),
               Positioned.fill(
                 child: DecoratedBox(

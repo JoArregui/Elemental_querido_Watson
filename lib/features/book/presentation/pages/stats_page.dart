@@ -35,8 +35,9 @@ class StatsPage extends StatelessWidget {
     final secrets = repo.secretsCount;
 
     String rank = isEn ? 'Apprentice' : 'Aprendiz';
-    if (totalXp >= 1500) rank = isEn ? 'Holmes' : 'Holmes';
-    else if (totalXp >= 800) rank = isEn ? 'Watson' : 'Watson';
+    if (totalXp >= 1500) {
+      rank = isEn ? 'Holmes' : 'Holmes';
+    } else if (totalXp >= 800) rank = isEn ? 'Watson' : 'Watson';
     else if (totalXp >= 300) rank = isEn ? 'Investigator' : 'Investigador';
 
     return Scaffold(

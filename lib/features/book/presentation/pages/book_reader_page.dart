@@ -33,8 +33,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
   bool _isReading = false;
   bool _isPaused = false;
   bool _mirror = false;
-  bool _isTimed = false;
-  int _secondsLeft = 0;
+  final bool _isTimed = false;
+  final int _secondsLeft = 0;
   double _textScale = 1.0;
   TtsService? _tts;
   // C3: resaltado de palabra y oración
@@ -477,7 +477,7 @@ class _BookReaderPageState extends State<BookReaderPage> {
         // Imagen de recompensa (assets/rewards/<bookId>.png) si 100% o completado
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.asset('assets/rewards/${state.book.id}.png', width: 140, height: 140, fit: BoxFit.cover, errorBuilder: (_,__,___) => Icon(tier == 'perfect' ? Icons.auto_stories : tier == 'good' ? Icons.menu_book : Icons.book_outlined, size: 56, color: tier == 'perfect' ? Colors.green.shade700 : Colors.brown)),
+          child: Image.asset('assets/rewards/${state.book.id}.png', width: 140, height: 140, fit: BoxFit.cover, errorBuilder: (_,_,_) => Icon(tier == 'perfect' ? Icons.auto_stories : tier == 'good' ? Icons.menu_book : Icons.book_outlined, size: 56, color: tier == 'perfect' ? Colors.green.shade700 : Colors.brown)),
         ),
         const SizedBox(height: 8),
         Text(
@@ -545,8 +545,8 @@ class _BookReaderPageState extends State<BookReaderPage> {
           ),
         ),
         const SizedBox(height: 10),
-        // Tu versión de la historia: con 12 puntos de rama no hay dos
-        // partidas iguales. Se listan los desvíos tomados en este libro.
+        // Tu versión de la historia: solo se muestra si hay desvíos.
+        // El mensaje de "historia lineal" se ha quitado por petición.
         Builder(builder: (ctx) {
           final locale =
               AppLocalizations.of(ctx).locale.languageCode;
@@ -558,38 +558,28 @@ class _BookReaderPageState extends State<BookReaderPage> {
                   BookBloc.branchTitleFor(p.puzzle.id, locale) ??
                   p.puzzle.id)
               .toList();
+          if (took.isEmpty) return const SizedBox.shrink();
           return Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: took.isEmpty
-                  ? Colors.green.shade50
-                  : Colors.purple.shade50,
+              color: Colors.purple.shade50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: took.isEmpty
-                      ? Colors.green.shade300
-                      : Colors.purple.shade300,
+                  color: Colors.purple.shade300,
                   width: 2),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.alt_route,
-                    size: 20,
-                    color: took.isEmpty
-                        ? Colors.green.shade700
-                        : Colors.purple.shade700),
+                    size: 20, color: Colors.purple.shade700),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    took.isEmpty
-                        ? (isEn
-                            ? 'Your version: straight story — no two playthroughs are alike when you branch!'
-                            : 'Tu versión: historia lineal — ¡no hay dos partidas iguales cuando ramificas!')
-                        : (isEn
-                            ? 'Your version: ${took.length} detour(s) — ${took.join(', ')}'
-                            : 'Tu versión: ${took.length} desvío(s) — ${took.join(', ')}'),
+                    isEn
+                        ? 'Your version: ${took.length} detour(s) — ${took.join(', ')}'
+                        : 'Tu versión: ${took.length} desvío(s) — ${took.join(', ')}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 12,

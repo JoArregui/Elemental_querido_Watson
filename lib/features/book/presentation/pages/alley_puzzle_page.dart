@@ -166,7 +166,7 @@ class _AlleyPuzzlePageState extends State<AlleyPuzzlePage> {
                         children: [
                           AspectRatio(
                             aspectRatio: 16 / 10,
-                            child: Image.asset(widget.asset, fit: BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Colors.brown.shade200, child: const Icon(Icons.image, size: 48, color: Colors.white))),
+                            child: Image.asset(widget.asset, fit: BoxFit.cover, errorBuilder: (_,_,_)=> Container(color: Colors.brown.shade200, child: const Icon(Icons.image, size: 48, color: Colors.white))),
                           ),
                           Positioned.fill(
                             child: DecoratedBox(

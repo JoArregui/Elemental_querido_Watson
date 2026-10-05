@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       builder: (context, locale, _) {
         return ValueListenableBuilder<bool>(
           valueListenable: a11y,
-          builder: (context, highContrast, __) {
+          builder: (context, highContrast, _) {
             return BlocProvider(
               create: (_) => di.sl<LibraryBloc>()..add(const LoadLibraryEvent()),
               child: MaterialApp(
